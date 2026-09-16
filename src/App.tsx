@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Sidebar } from './components/Layout/Sidebar';
 import { Header } from './components/Layout/Header';
 import { EmailList } from './components/Email/EmailList';
@@ -9,6 +9,7 @@ import { AgentDashboard } from './components/Agent/AgentDashboard';
 import { SettingsModal } from './components/Settings/SettingsModal';
 import { MobileTabBar } from './components/Layout/MobileTabBar';
 import { MobileDrawer } from './components/Layout/MobileDrawer';
+import { useI18n } from './core/i18n/useI18n';
 
 import { 
   EmailMessage, 
@@ -61,14 +62,32 @@ export function App() {
   }, []);
 
   // 弹窗与加载态
+  const { t } = useI18n();
   const [isComposerOpen, setIsComposerOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isProcessingAgent, setIsProcessingAgent] = useState(false);
+  const [activeAgentEmailId, setActiveAgentEmailId] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const [isSyncingProduction, setIsSyncingProduction] = useState(false);
 
   // 引擎单例
   const coordinator = useMemo(() => new PipelineCoordinator(llmConfig), [llmConfig]);
   const sender = useMemo(() => new OutboundSender(outboundConfig, cfConfig), [outboundConfig, cfConfig]);
+
+  const activeAgentEmailSubject = useMemo(() => {
+    if (!activeAgentEmailId) return undefined;
+    return emails.find(e => e.id === activeAgentEmailId)?.subject;
+  }, [activeAgentEmailId, emails]);
+
+  // 随时紧急停止当前 Agent 研判，中断底层网络请求并冻结计费
+  const handleStopAgent = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setActiveAgentEmailId(null);
+    setIsProcessingAgent(false);
+  };
 
   // 选中的域名与别名实体
   const selectedDomain = useMemo(() => {
@@ -237,9 +256,31 @@ export function App() {
     setEmails(updated);
   };
 
-  // 触发 Agent 研判特定邮件（注入专属域名知识库）
+  // 触发 Agent 研判特定邮件（支持随时手动停止，防资金损失与超额扣费）
   const handleRunAgentForEmail = async (email: EmailMessage, e?: React.MouseEvent) => {
     e?.stopPropagation();
+
+    // 如果当前正对这封邮件研判，再次点击立即执行紧急停止与断路
+    if (activeAgentEmailId === email.id) {
+      handleStopAgent();
+      return;
+    }
+
+    // 预算熔断保护检查：若累计消费已达到单日预算上限，直接阻断
+    const dailyBudget = llmConfig.dailyBudgetUsd ?? 1.00;
+    if (totalCostUsd >= dailyBudget) {
+      alert(t('settings.budgetExceededWarning'));
+      return;
+    }
+
+    // 终止可能在跑的前序任务，创建全新 AbortController
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    setActiveAgentEmailId(email.id);
     setIsProcessingAgent(true);
     const domainCtx = getEmailDomainContext(email);
     try {
@@ -248,34 +289,56 @@ export function App() {
         (interimRun) => {
           setPipelineRuns(prev => [interimRun, ...prev.filter(r => r.runId !== interimRun.runId)]);
         },
-        domainCtx
+        domainCtx,
+        controller.signal
       );
 
       const updatedRuns = LocalStorageDB.addPipelineRun(run);
       setPipelineRuns(updatedRuns);
 
       const updatedEmails = LocalStorageDB.updateEmail(email.id, {
-        agentProcessed: true,
+        agentProcessed: run.status !== 'stopped',
         agentInsight: insight,
       });
       setEmails(updatedEmails);
+    } catch (err: any) {
+      if (err?.name !== 'AbortError') {
+        console.error('Agent pipeline error:', err);
+      }
     } finally {
-      setIsProcessingAgent(false);
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null;
+        setActiveAgentEmailId(null);
+        setIsProcessingAgent(false);
+      }
     }
   };
 
-  // 模拟来信到达：自动注入 Agent 流水线与业务知识库
+  // 模拟来信到达：根据用户配置决定是否自动研判（默认按需手动研判以避免不必要花费）
   const handleSimulateInbound = async () => {
     const targetDomain = selectedDomain ? selectedDomain.domain : (domains[0]?.domain || 'cutready.app');
     const targetAlias = selectedAlias ? selectedAlias.fullAddress : undefined;
     const newMail = generateRandomMockEmail(targetDomain, targetAlias);
 
-    // 首先入库
+    // 首先入库本地保存
     const withNew = LocalStorageDB.addEmail(newMail);
     setEmails(withNew);
     setSelectedEmailId(newMail.id);
 
-    // 启动 Agent 自动处理流水线
+    // 若用户未开启「来信自动研判」或已触碰预算保护线，则仅入库，不自动消耗 API 费用
+    if (!llmConfig.autoProcessInbound) {
+      return;
+    }
+
+    const dailyBudget = llmConfig.dailyBudgetUsd ?? 1.00;
+    if (totalCostUsd >= dailyBudget) {
+      return;
+    }
+
+    // 启动 Agent 自动处理流水线（支持随时手动终止）
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    setActiveAgentEmailId(newMail.id);
     setIsProcessingAgent(true);
     const domainCtx = getEmailDomainContext(newMail);
     try {
@@ -284,19 +347,28 @@ export function App() {
         (interimRun) => {
           setPipelineRuns(prev => [interimRun, ...prev.filter(r => r.runId !== interimRun.runId)]);
         },
-        domainCtx
+        domainCtx,
+        controller.signal
       );
 
       const updatedRuns = LocalStorageDB.addPipelineRun(run);
       setPipelineRuns(updatedRuns);
 
       const finalUpdated = LocalStorageDB.updateEmail(newMail.id, {
-        agentProcessed: true,
+        agentProcessed: run.status !== 'stopped',
         agentInsight: insight,
       });
       setEmails(finalUpdated);
+    } catch (err: any) {
+      if (err?.name !== 'AbortError') {
+        console.error('Auto pipeline error:', err);
+      }
     } finally {
-      setIsProcessingAgent(false);
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null;
+        setActiveAgentEmailId(null);
+        setIsProcessingAgent(false);
+      }
     }
   };
 
@@ -337,28 +409,30 @@ export function App() {
           setDomains(currentDomains);
         }
 
-        // 送入 DeepSeek-R1 流水线研判（注入对应域名知识库）
-        try {
-          const domainCtx = getEmailDomainContext(newMail);
-          const { insight, run } = await coordinator.runPipeline(
-            newMail, 
-            (interimRun) => {
-              setPipelineRuns(prev => [interimRun, ...prev.filter(r => r.runId !== interimRun.runId)]);
-            },
-            domainCtx
-          );
-          LocalStorageDB.addPipelineRun(run);
-          currentEmails = LocalStorageDB.updateEmail(newMail.id, {
-            agentProcessed: true,
-            agentInsight: insight,
-          });
-          setEmails(currentEmails);
-        } catch (err) {
-          console.error('Agent pipeline error for live mail:', err);
+        // 仅在开启来信自动研判时才执行大模型调用，防无感知扣费
+        if (llmConfig.autoProcessInbound) {
+          try {
+            const domainCtx = getEmailDomainContext(newMail);
+            const { insight, run } = await coordinator.runPipeline(
+              newMail, 
+              (interimRun) => {
+                setPipelineRuns(prev => [interimRun, ...prev.filter(r => r.runId !== interimRun.runId)]);
+              },
+              domainCtx
+            );
+            LocalStorageDB.addPipelineRun(run);
+            currentEmails = LocalStorageDB.updateEmail(newMail.id, {
+              agentProcessed: run.status !== 'stopped',
+              agentInsight: insight,
+            });
+            setEmails(currentEmails);
+          } catch (err) {
+            console.error('Agent pipeline error for live mail:', err);
+          }
         }
       }
 
-      alert(`🎉 成功从 Cloudflare 同步 ${liveMails.length} 封生产邮件，DeepSeek-R1 已完成自动研判！`);
+      alert(`🎉 成功从 Cloudflare 同步 ${liveMails.length} 封生产邮件！${llmConfig.autoProcessInbound ? 'DeepSeek-R1 已完成自动研判。' : '可手动选择重点邮件进行 AI 研判。'}`);
     } catch (err: any) {
       alert(`⚠️ Cloudflare 同步提示: ${err?.message || '网络连接超时'}`);
     } finally {
@@ -531,6 +605,8 @@ export function App() {
           isMobile={isMobile}
           onNewEmail={() => setIsComposerOpen(true)}
           onOpenMobileDrawer={() => setIsMobileDrawerOpen(true)}
+          onEmergencyStop={handleStopAgent}
+          activeEmailSubject={activeAgentEmailSubject}
         />
 
         {/* 视图切换 */}
@@ -550,6 +626,8 @@ export function App() {
                   }}
                   onRunAgent={handleRunAgentForEmail}
                   onOpenSettings={() => setIsSettingsOpen(true)}
+                  isAgentRunning={activeAgentEmailId === mobileActiveEmail.id}
+                  onStopAgent={handleStopAgent}
                 />
               ) : (
                 <EmailList
@@ -560,6 +638,8 @@ export function App() {
                   onToggleStar={handleToggleStar}
                   onRunAgentForEmail={handleRunAgentForEmail}
                   currentInboxTitle={currentInboxTitle}
+                  activeAgentEmailId={activeAgentEmailId}
+                  onStopAgent={handleStopAgent}
                 />
               )
             ) : (
@@ -572,6 +652,8 @@ export function App() {
                   onToggleStar={handleToggleStar}
                   onRunAgentForEmail={handleRunAgentForEmail}
                   currentInboxTitle={currentInboxTitle}
+                  activeAgentEmailId={activeAgentEmailId}
+                  onStopAgent={handleStopAgent}
                 />
                 <EmailDetail
                   email={selectedEmail}
@@ -580,6 +662,8 @@ export function App() {
                   onArchive={handleArchive}
                   onRunAgent={handleRunAgentForEmail}
                   onOpenSettings={() => setIsSettingsOpen(true)}
+                  isAgentRunning={activeAgentEmailId === selectedEmail?.id}
+                  onStopAgent={handleStopAgent}
                 />
               </>
             )
@@ -618,6 +702,8 @@ export function App() {
               }}
               onOpenSettings={() => setIsSettingsOpen(true)}
               isMobile={isMobile}
+              isProcessing={isProcessingAgent}
+              onEmergencyStop={handleStopAgent}
             />
           )}
         </div>

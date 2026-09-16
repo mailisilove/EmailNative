@@ -10,7 +10,9 @@ import {
   CreditCard, 
   Edit3, 
   FileText,
-  ChevronLeft 
+  ChevronLeft,
+  Square,
+  ShieldCheck
 } from 'lucide-react';
 import { EmailMessage } from '../../core/types';
 import { VerificationCodeCard } from './VerificationCodeCard';
@@ -25,6 +27,8 @@ interface EmailDetailProps {
   onRunAgent: (email: EmailMessage) => void;
   onOpenSettings?: () => void;
   onBack?: () => void;
+  isAgentRunning?: boolean;
+  onStopAgent?: () => void;
 }
 
 export const EmailDetail: React.FC<EmailDetailProps> = ({
@@ -35,6 +39,8 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
   onRunAgent,
   onOpenSettings,
   onBack,
+  isAgentRunning = false,
+  onStopAgent,
 }) => {
   const { t } = useI18n();
   const [replyText, setReplyText] = useState('');
@@ -174,28 +180,112 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
           </button>
         </div>
 
-        <button
-          onClick={() => onRunAgent(email)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '5px',
-            padding: '6px 10px',
-            borderRadius: '8px',
-            background: 'rgba(99, 102, 241, 0.15)',
-            border: '1px solid rgba(99, 102, 241, 0.3)',
-            color: '#c7d2fe',
-            fontSize: '11px',
-            fontWeight: 500
-          }}
-        >
-          <Sparkles size={12} color="#a78bfa" />
-          <span>{t('emailList.runAgent')}</span>
-        </button>
+        {isAgentRunning ? (
+          <button
+            onClick={() => onStopAgent ? onStopAgent() : onRunAgent(email)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 12px',
+              borderRadius: '8px',
+              background: 'rgba(239, 68, 68, 0.2)',
+              border: '1px solid rgba(239, 68, 68, 0.5)',
+              color: '#fca5a5',
+              fontSize: '11px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              boxShadow: '0 0 10px rgba(239, 68, 68, 0.25)',
+            }}
+            className="animate-pulse"
+            title={t('emailDetail.stopAgent')}
+          >
+            <Square size={12} fill="#f87171" color="#f87171" />
+            <span>{t('emailDetail.stopAgent')}</span>
+          </button>
+        ) : (
+          <button
+            onClick={() => onRunAgent(email)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              padding: '6px 10px',
+              borderRadius: '8px',
+              background: 'rgba(99, 102, 241, 0.15)',
+              border: '1px solid rgba(99, 102, 241, 0.3)',
+              color: '#c7d2fe',
+              fontSize: '11px',
+              fontWeight: 500
+            }}
+          >
+            <Sparkles size={12} color="#a78bfa" />
+            <span>{t('emailList.runAgent')}</span>
+          </button>
+        )}
       </div>
 
       {/* 邮件正文区域 */}
       <div style={{ padding: '16px 20px', flex: 1 }}>
+        {/* 正在研判中横幅 - 提供随时终止提示 */}
+        {isAgentRunning && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '10px 14px',
+            marginBottom: '16px',
+            borderRadius: '8px',
+            background: 'rgba(239, 68, 68, 0.12)',
+            border: '1px solid rgba(239, 68, 68, 0.35)',
+            color: '#fca5a5',
+            fontSize: '12px',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Sparkles size={14} className="animate-spin-slow" color="#f87171" />
+              <span>{t('emailDetail.analyzingNotice')}</span>
+            </div>
+            <button
+              onClick={onStopAgent}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                background: 'rgba(239, 68, 68, 0.3)',
+                border: '1px solid rgba(239, 68, 68, 0.6)',
+                color: '#fff',
+                fontWeight: 600,
+                fontSize: '11px',
+                cursor: 'pointer',
+              }}
+            >
+              <Square size={10} fill="#fff" />
+              <span>{t('emailDetail.stopAgent')}</span>
+            </button>
+          </div>
+        )}
+
+        {/* 若此邮件此前被用户手动终止过，展示安全保护提示 */}
+        {insight?.isStopped && !isAgentRunning && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '10px 14px',
+            marginBottom: '16px',
+            borderRadius: '8px',
+            background: 'rgba(245, 158, 11, 0.1)',
+            border: '1px solid rgba(245, 158, 11, 0.3)',
+            color: '#fde68a',
+            fontSize: '12px',
+          }}>
+            <ShieldCheck size={15} color="#f59e0b" />
+            <span>{t('emailDetail.stoppedNotice')}</span>
+          </div>
+        )}
+
         {/* 验证码高光卡片 (如果存在) */}
         {insight?.verificationCode && (
           <VerificationCodeCard info={insight.verificationCode} />

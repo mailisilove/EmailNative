@@ -7,7 +7,8 @@ import {
   Receipt, 
   Briefcase, 
   AlertTriangle,
-  MailCheck
+  MailCheck,
+  Square
 } from 'lucide-react';
 import { EmailCategory, EmailMessage } from '../../core/types';
 import { useI18n } from '../../core/i18n/I18nContext';
@@ -20,6 +21,8 @@ interface EmailListProps {
   onRunAgentForEmail: (email: EmailMessage, e: React.MouseEvent) => void;
   currentInboxTitle?: string;
   isMobile?: boolean;
+  activeAgentEmailId?: string | null;
+  onStopAgent?: () => void;
 }
 
 export const EmailList: React.FC<EmailListProps> = ({
@@ -30,6 +33,8 @@ export const EmailList: React.FC<EmailListProps> = ({
   onRunAgentForEmail,
   currentInboxTitle,
   isMobile = false,
+  activeAgentEmailId,
+  onStopAgent,
 }) => {
   const { t } = useI18n();
   const inboxTitle = currentInboxTitle || t('sidebar.allInboxes');
@@ -255,8 +260,32 @@ export const EmailList: React.FC<EmailListProps> = ({
                 )}
               </div>
 
-              {/* 仅在未处理时显示极轻量 Agent 图标 */}
-              {!email.agentProcessed && (
+              {/* 正在研判该邮件时显示可中断的停止按钮，未研判时显示触发图标 */}
+              {activeAgentEmailId === email.id ? (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onStopAgent?.();
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '3px 6px',
+                    borderRadius: '4px',
+                    color: '#f87171',
+                    background: 'rgba(239, 68, 68, 0.25)',
+                    border: '1px solid rgba(239, 68, 68, 0.5)',
+                    fontSize: '10px',
+                    fontWeight: 600,
+                  }}
+                  className="animate-pulse"
+                  title={t('emailList.stopAgent')}
+                >
+                  <Square size={9} fill="#f87171" />
+                  <span>{t('emailList.analyzing')}</span>
+                </button>
+              ) : !email.agentProcessed ? (
                 <button
                   onClick={(e) => onRunAgentForEmail(email, e)}
                   style={{
@@ -271,7 +300,7 @@ export const EmailList: React.FC<EmailListProps> = ({
                 >
                   <Sparkles size={11} />
                 </button>
-              )}
+              ) : null}
             </div>
           </div>
         );

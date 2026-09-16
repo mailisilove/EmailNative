@@ -58,6 +58,8 @@ export interface Translations {
     simulateTooltip: string;
     syncTooltip: string;
     langTooltip: string;
+    emergencyStop: string;
+    analyzingEmail: string;
   };
   emailList: {
     all: string;
@@ -71,6 +73,8 @@ export interface Translations {
     noEmailsDesc: string;
     itemsCount: string;
     runAgent: string;
+    stopAgent: string;
+    analyzing: string;
     markStar: string;
     unmarkStar: string;
     justNow: string;
@@ -108,6 +112,10 @@ export interface Translations {
     passed: string;
     risk: string;
     quickReplyPlaceholder: string;
+    stopAgent: string;
+    stopping: string;
+    stoppedNotice: string;
+    analyzingNotice: string;
   };
   composer: {
     title: string;
@@ -209,6 +217,15 @@ export interface Translations {
     cfWorkerUrl: string;
     cfWorkerToken: string;
     resendKey: string;
+    tabCostSafeguards: string;
+    autoProcessInbound: string;
+    autoProcessInboundDesc: string;
+    maxCostPerRun: string;
+    maxCostPerRunDesc: string;
+    dailyBudget: string;
+    dailyBudgetDesc: string;
+    budgetExceededWarning: string;
+    costProtectionNotice: string;
   };
   agent: {
     dashboardTitle: string;
@@ -223,6 +240,10 @@ export interface Translations {
     pipelineStage: string;
     intentLabel: string;
     statusLabel: string;
+    emergencyStop: string;
+    activeAnalysis: string;
+    budgetWatermark: string;
+    statusStopped: string;
   };
   mobile: {
     inbox: string;

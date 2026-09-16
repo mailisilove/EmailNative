@@ -6,7 +6,8 @@ import {
   Send, 
   Coins, 
   Zap,
-  Activity
+  Activity,
+  Square
 } from 'lucide-react';
 import { AgentPipelineRun, LLMConfig } from '../../core/types';
 import { Settings, Sliders, Cpu, CheckCircle } from 'lucide-react';
@@ -20,6 +21,8 @@ interface AgentDashboardProps {
   onClearRuns: () => void;
   onOpenSettings?: () => void;
   isMobile?: boolean;
+  isProcessing?: boolean;
+  onEmergencyStop?: () => void;
 }
 
 export const AgentDashboard: React.FC<AgentDashboardProps> = ({
@@ -30,6 +33,8 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
   onClearRuns,
   onOpenSettings,
   isMobile = false,
+  isProcessing = false,
+  onEmergencyStop,
 }) => {
   const { t } = useI18n();
   return (
@@ -81,6 +86,58 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
           </button>
         )}
       </div>
+
+      {/* 实时研判中提示条与紧急终止断路器 */}
+      {isProcessing && onEmergencyStop && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '14px 18px',
+          marginBottom: '20px',
+          borderRadius: '12px',
+          background: 'rgba(239, 68, 68, 0.12)',
+          border: '1px solid rgba(239, 68, 68, 0.4)',
+          boxShadow: '0 0 16px rgba(239, 68, 68, 0.2)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{
+              width: '10px',
+              height: '10px',
+              borderRadius: '50%',
+              background: '#f87171',
+              boxShadow: '0 0 10px #ef4444'
+            }} className="animate-pulse" />
+            <div>
+              <div style={{ fontSize: '13px', fontWeight: 600, color: '#fca5a5' }}>
+                {t('agent.activeAnalysis')}
+              </div>
+              <div style={{ fontSize: '11px', color: 'rgba(254, 202, 202, 0.8)' }}>
+                {t('settings.costProtectionNotice')}
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={onEmergencyStop}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 14px',
+              borderRadius: '8px',
+              background: 'rgba(239, 68, 68, 0.3)',
+              border: '1px solid rgba(239, 68, 68, 0.6)',
+              color: '#fff',
+              fontSize: '12px',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            <Square size={12} fill="#fff" />
+            <span>{t('agent.emergencyStop')}</span>
+          </button>
+        </div>
+      )}
 
       {/* 核心指标统计：花费、任务总数、Token (自适应移动端) */}
       <div style={{
@@ -357,10 +414,23 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
                       width: '8px',
                       height: '8px',
                       borderRadius: '50%',
-                      background: r.status === 'success' ? '#10b981' : (r.status === 'needs_approval' ? '#f59e0b' : '#38bdf8')
+                      background: r.status === 'success' ? '#10b981' : (r.status === 'needs_approval' ? '#f59e0b' : (r.status === 'stopped' ? '#ef4444' : '#38bdf8'))
                     }} />
                     <span style={{ fontSize: '13px', fontWeight: 600, color: '#fff' }}>{r.emailSubject}</span>
                     <span style={{ fontSize: '11px', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>({r.domainAddress})</span>
+                    {r.status === 'stopped' && (
+                      <span style={{
+                        fontSize: '10px',
+                        padding: '1px 6px',
+                        borderRadius: '4px',
+                        background: 'rgba(239, 68, 68, 0.2)',
+                        border: '1px solid rgba(239, 68, 68, 0.4)',
+                        color: '#f87171',
+                        fontWeight: 600,
+                      }}>
+                        {t('agent.statusStopped')}
+                      </span>
+                    )}
                   </div>
 
                   <div style={{ fontSize: '11px', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '8px' }}>

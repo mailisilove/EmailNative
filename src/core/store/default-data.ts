@@ -117,9 +117,12 @@ export const DEFAULT_LLM_CONFIG: LLMConfig = {
   model: 'deepseek-reasoner', // 默认原生启用 DeepSeek-R1 深度推理模型
   apiEndpoint: 'https://api.deepseek.com',
   temperature: 0.3,
-  autoProcessInbound: true,
+  autoProcessInbound: false, // 默认关闭来信自动研判，由用户精准手动控制，避免产生意外开销
   automationLevel: 'balanced',
   enableReasoningStream: true, // 默认开启 DSCode 风格的思维链流
+  maxCostPerRunUsd: 0.05,     // 单封邮件研判最高限额 $0.05
+  dailyBudgetUsd: 1.00,       // 单日预算保护上限 $1.00
+  requireManualConfirm: false,
 };
 
 export const DEFAULT_CLOUDFLARE_CONFIG: CloudflareConfig = {

@@ -523,6 +523,109 @@ export default {
                   }}
                 />
               </div>
+
+              {/* 资金安全与防损控制 / Cost & Budget Safeguards */}
+              <div style={{
+                marginTop: '4px',
+                padding: '14px 16px',
+                borderRadius: '10px',
+                background: 'rgba(239, 68, 68, 0.08)',
+                border: '1px solid rgba(239, 68, 68, 0.25)',
+              }}>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: '#fca5a5', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <ShieldCheck size={16} color="#f87171" />
+                  <span>{t('settings.tabCostSafeguards')}</span>
+                </div>
+                <div style={{ fontSize: '11px', color: '#fecaca', marginBottom: '14px', lineHeight: 1.5 }}>
+                  {t('settings.costProtectionNotice')}
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {/* 来信自动研判开关 */}
+                  <label style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '10px',
+                    cursor: 'pointer',
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    background: 'rgba(0, 0, 0, 0.25)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={llm.autoProcessInbound ?? false}
+                      onChange={(e) => setLlm({ ...llm, autoProcessInbound: e.target.checked })}
+                      style={{ accentColor: '#ef4444', marginTop: '3px' }}
+                    />
+                    <div>
+                      <div style={{ fontSize: '12px', fontWeight: 600, color: '#fff' }}>
+                        {t('settings.autoProcessInbound')}
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '2px' }}>
+                        {t('settings.autoProcessInboundDesc')}
+                      </div>
+                    </div>
+                  </label>
+
+                  {/* 单次与每日预算保护限额 */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div>
+                      <label style={{ fontSize: '11px', color: 'var(--text-dim)', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
+                        {t('settings.maxCostPerRun')}
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0.01"
+                        max="10"
+                        value={llm.maxCostPerRunUsd ?? 0.05}
+                        onChange={(e) => setLlm({ ...llm, maxCostPerRunUsd: parseFloat(e.target.value) || 0.05 })}
+                        style={{
+                          width: '100%',
+                          padding: '7px 10px',
+                          borderRadius: '6px',
+                          background: 'rgba(0, 0, 0, 0.4)',
+                          border: '1px solid var(--border-subtle)',
+                          color: '#10b981',
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: '12px',
+                        }}
+                      />
+                      <div style={{ fontSize: '10px', color: 'var(--text-dim)', marginTop: '3px' }}>
+                        {t('settings.maxCostPerRunDesc')}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label style={{ fontSize: '11px', color: 'var(--text-dim)', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
+                        {t('settings.dailyBudget')}
+                      </label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        min="0.1"
+                        max="100"
+                        value={llm.dailyBudgetUsd ?? 1.00}
+                        onChange={(e) => setLlm({ ...llm, dailyBudgetUsd: parseFloat(e.target.value) || 1.00 })}
+                        style={{
+                          width: '100%',
+                          padding: '7px 10px',
+                          borderRadius: '6px',
+                          background: 'rgba(0, 0, 0, 0.4)',
+                          border: '1px solid var(--border-subtle)',
+                          color: '#f59e0b',
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: '12px',
+                        }}
+                      />
+                      <div style={{ fontSize: '10px', color: 'var(--text-dim)', marginTop: '3px' }}>
+                        {t('settings.dailyBudgetDesc')}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 

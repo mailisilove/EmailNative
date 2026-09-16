@@ -65,6 +65,7 @@ export interface AgentInsight {
     costUsd: number;
   };
   processedAt: string;
+  isStopped?: boolean;
 }
 
 export interface EmailMessage {
@@ -134,7 +135,7 @@ export interface AgentPipelineStep {
   id: 'security_filter' | 'extractor' | 'drafter' | 'action_runner';
   name: string;
   description: string;
-  status: 'idle' | 'running' | 'completed' | 'failed' | 'skipped';
+  status: 'idle' | 'running' | 'completed' | 'failed' | 'skipped' | 'stopped';
   output?: string;
   durationMs?: number;
 }
@@ -146,7 +147,7 @@ export interface AgentPipelineRun {
   domainAddress: string;
   startedAt: string;
   completedAt?: string;
-  status: 'processing' | 'success' | 'needs_approval' | 'error';
+  status: 'processing' | 'success' | 'needs_approval' | 'error' | 'stopped';
   steps: AgentPipelineStep[];
   tokensConsumed: number;
   costEstimateUsd: number;
@@ -163,6 +164,9 @@ export interface LLMConfig {
   autoProcessInbound: boolean;
   automationLevel: AutomationLevel;
   enableReasoningStream: boolean; // 是否展示 DeepSeek-R1 思维链
+  maxCostPerRunUsd?: number;      // 单封邮件研判最高限额（美元，如 0.05）
+  dailyBudgetUsd?: number;        // 单日累计预算上限（美元，如 1.00）
+  requireManualConfirm?: boolean; // 研判前提示确认
 }
 
 export interface CloudflareConfig {

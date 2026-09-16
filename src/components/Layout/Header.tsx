@@ -8,7 +8,8 @@ import {
   Cloud, 
   X, 
   Edit3,
-  Menu
+  Menu,
+  Square
 } from 'lucide-react';
 import { ManagedDomain } from '../../core/types';
 import { useI18n } from '../../core/i18n/I18nContext';
@@ -29,6 +30,8 @@ interface HeaderProps {
   isMobile?: boolean;
   onNewEmail?: () => void;
   onOpenMobileDrawer?: () => void;
+  onEmergencyStop?: () => void;
+  activeEmailSubject?: string;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -46,6 +49,8 @@ export const Header: React.FC<HeaderProps> = ({
   isMobile = false,
   onNewEmail,
   onOpenMobileDrawer,
+  onEmergencyStop,
+  activeEmailSubject,
 }) => {
   const { t } = useI18n();
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -103,6 +108,30 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* 右侧轻量动作区 */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {isProcessing && onEmergencyStop && (
+              <button
+                onClick={onEmergencyStop}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '4px 10px',
+                  borderRadius: '20px',
+                  background: 'rgba(239, 68, 68, 0.2)',
+                  border: '1px solid rgba(239, 68, 68, 0.4)',
+                  color: '#f87171',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+                className="animate-pulse"
+                title={`${t('header.emergencyStop')}${activeEmailSubject ? `: ${activeEmailSubject}` : ''}`}
+              >
+                <Square size={10} fill="#f87171" />
+                <span>{t('header.emergencyStop')}</span>
+              </button>
+            )}
+
             <LanguageToggle compact />
 
             <button
@@ -294,6 +323,32 @@ export const Header: React.FC<HeaderProps> = ({
           <span style={{ color: 'var(--text-dim)' }}>|</span>
           <span style={{ color: '#10b981', fontWeight: 600 }}>${totalCostUsd.toFixed(4)}</span>
         </div>
+
+        {/* 紧急止损 / 随时停止当前研判按钮 */}
+        {isProcessing && onEmergencyStop && (
+          <button
+            onClick={onEmergencyStop}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '4px 10px',
+              borderRadius: '6px',
+              background: 'rgba(239, 68, 68, 0.2)',
+              border: '1px solid rgba(239, 68, 68, 0.5)',
+              color: '#f87171',
+              fontSize: '11px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              boxShadow: '0 0 12px rgba(239, 68, 68, 0.3)',
+            }}
+            className="animate-pulse"
+            title={`${t('header.emergencyStop')}${activeEmailSubject ? `: ${activeEmailSubject}` : ''}`}
+          >
+            <Square size={11} fill="#f87171" />
+            <span>{t('header.emergencyStop')}</span>
+          </button>
+        )}
 
         {/* 同步 Cloudflare 生产邮件 */}
         {onSyncProduction && (

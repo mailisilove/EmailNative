@@ -36,8 +36,13 @@ export class DeepSeekHarness {
    */
   async analyzeEmail(
     email: EmailMessage, 
-    domainContext?: { aiPersona?: string; signature?: string; displayName?: string }
+    domainContext?: { aiPersona?: string; signature?: string; displayName?: string },
+    abortSignal?: AbortSignal
   ): Promise<DeepSeekAnalysisResult> {
+    if (abortSignal?.aborted) {
+      throw new DOMException('Analysis aborted by user', 'AbortError');
+    }
+
     const t0 = Date.now();
     const personaPrompt = domainContext?.aiPersona 
       ? `\n【当前产品/域名客服知识库与人设要求】：\n${domainContext.aiPersona}` 
@@ -49,6 +54,7 @@ export class DeepSeekHarness {
       try {
         const res = await fetch(`${this.endpoint}/chat/completions`, {
           method: 'POST',
+          signal: abortSignal,
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.apiKey}`,
@@ -107,13 +113,31 @@ export class DeepSeekHarness {
             },
           };
         }
-      } catch (err) {
+      } catch (err: any) {
+        if (err?.name === 'AbortError') {
+          throw err;
+        }
         console.warn('DeepSeek remote API call failed, switching to local deep inference:', err);
       }
     }
 
-    // 本地高质量仿真推理（完美还原 DeepSeek-R1 的思考链与 Cache 特征，融入产品线知识）
-    await new Promise(r => setTimeout(r, 650));
+    if (abortSignal?.aborted) {
+      throw new DOMException('Analysis aborted by user', 'AbortError');
+    }
+
+    // 本地高质量仿真推理（支持即时中断监听）
+    await new Promise<void>((resolve, reject) => {
+      const timer = setTimeout(() => {
+        resolve();
+      }, 650);
+
+      if (abortSignal) {
+        abortSignal.addEventListener('abort', () => {
+          clearTimeout(timer);
+          reject(new DOMException('Analysis aborted by user', 'AbortError'));
+        }, { once: true });
+      }
+    });
     const duration = Date.now() - t0;
 
     const isVerification = /(?:code|验证码|PIN|verify|2FA)/i.test(email.subject + ' ' + email.bodyText);
