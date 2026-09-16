@@ -160,10 +160,10 @@ export class DeepSeekHarness {
       thought = `思考过程：\n1. 识别发件人业务咨询。\n2. 匹配业务上下文：收信地址为 [${email.toAddress}]。\n3. 载入产品专属知识库：${domainContext?.aiPersona || '默认企业商务口吻'}。\n4. 针对性生成回复建议，并注入专属签名 [${domainContext?.displayName || 'Support'}]。`;
       
       let replyBody = '';
-      if (email.toAddress.includes('cutready')) {
-        replyBody = `您好！\n\n感谢联系 CutReady 技术支持。\n\n针对您咨询的问题，CutReady 支持智能透明背景与发丝级细化抠图。若遇到边缘反光，可在导出设置开启「高级发丝边缘抗锯齿」。\n\n关于退款政策：购买 7 天内且总处理张数未满 50 次的用户，均可无条件全额退款。若您有任何问题，我们随时在此为您服务！\n\n${sign}`;
-      } else if (email.toAddress.includes('image-layered')) {
-        replyBody = `Hello!\n\nThank you for reaching out to Image-Layered.\n\nWe deconstruct flat graphics into layered PSD files with high-precision transparent bitmap masks. If you need fully editable vector text layers, our OCR font synthesis feature is currently available in the latest Pro beta.\n\nPlease feel free to let us know if you need trial access!\n\n${sign}`;
+      if (email.toAddress.includes('saas-demo') || email.toAddress.includes('demo')) {
+        replyBody = `您好！\n\n感谢联系技术支持团队。\n\n针对您咨询的问题，我们平台支持高效的云端自动化流与团队协同集成。若需要测试高并发处理，可在控制台申请开发者并发通道。\n\n若您有任何问题，我们随时在此为您服务！\n\n${sign}`;
+      } else if (email.toAddress.includes('cloud-stack')) {
+        replyBody = `Hello!\n\nThank you for reaching out to CloudStack.\n\nOur platform offers developer-friendly serverless workflows and instant API endpoints.\n\nPlease feel free to let us know if you need trial access!\n\n${sign}`;
       } else {
         replyBody = `您好，感谢来信！\n\n已收到您关于“${email.subject}”的邮件。团队已完成初步评估，非常期待与您进一步沟通。\n\n顺祝商祺，\n${sign}`;
       }

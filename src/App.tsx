@@ -316,7 +316,7 @@ export function App() {
 
   // 模拟来信到达：根据用户配置决定是否自动研判（默认按需手动研判以避免不必要花费）
   const handleSimulateInbound = async () => {
-    const targetDomain = selectedDomain ? selectedDomain.domain : (domains[0]?.domain || 'cutready.app');
+    const targetDomain = selectedDomain ? selectedDomain.domain : (domains[0]?.domain || 'saas-demo.com');
     const targetAlias = selectedAlias ? selectedAlias.fullAddress : undefined;
     const newMail = generateRandomMockEmail(targetDomain, targetAlias);
 

@@ -11,8 +11,8 @@ export const DeepSeekReasoningBox: React.FC<DeepSeekReasoningBoxProps> = ({ reas
 
   return (
     <div style={{
-      background: 'rgba(15, 23, 42, 0.5)',
-      border: '1px solid rgba(99, 102, 241, 0.2)',
+      background: 'var(--bg-card)',
+      border: '1px solid var(--border-subtle)',
       borderRadius: '10px',
       overflow: 'hidden',
       marginBottom: '16px',
@@ -22,8 +22,8 @@ export const DeepSeekReasoningBox: React.FC<DeepSeekReasoningBoxProps> = ({ reas
         onClick={() => setIsExpanded(!isExpanded)}
         style={{
           padding: '8px 14px',
-          background: 'rgba(99, 102, 241, 0.05)',
-          borderBottom: isExpanded ? '1px solid rgba(255, 255, 255, 0.06)' : 'none',
+          background: 'rgba(99, 102, 241, 0.08)',
+          borderBottom: isExpanded ? '1px solid var(--border-subtle)' : 'none',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -32,8 +32,8 @@ export const DeepSeekReasoningBox: React.FC<DeepSeekReasoningBoxProps> = ({ reas
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <BrainCircuit size={14} color="#818cf8" />
-          <span style={{ fontSize: '12px', fontWeight: 600, color: '#c7d2fe' }}>
+          <BrainCircuit size={14} color="#6366f1" />
+          <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-main)' }}>
             思考过程
           </span>
           <span style={{
@@ -41,7 +41,8 @@ export const DeepSeekReasoningBox: React.FC<DeepSeekReasoningBoxProps> = ({ reas
             padding: '1px 5px',
             borderRadius: '4px',
             background: 'rgba(99, 102, 241, 0.18)',
-            color: '#a5b4fc',
+            color: '#4f46e5',
+            fontWeight: 700,
             fontFamily: 'var(--font-mono)',
           }}>
             {reasoning.model === 'deepseek-reasoner' ? 'R1' : 'V3'}
@@ -59,11 +60,11 @@ export const DeepSeekReasoningBox: React.FC<DeepSeekReasoningBoxProps> = ({ reas
           padding: '14px 18px',
           fontSize: '12px',
           lineHeight: 1.6,
-          color: '#94a3b8',
+          color: 'var(--text-main)',
           fontFamily: 'var(--font-mono)',
           whiteSpace: 'pre-wrap',
-          background: 'rgba(0, 0, 0, 0.25)',
-          borderLeft: '3px solid #818cf8',
+          background: 'var(--bg-surface-hover)',
+          borderLeft: '3px solid #6366f1',
           margin: '8px 12px 12px 12px',
           borderRadius: '4px'
         }}>

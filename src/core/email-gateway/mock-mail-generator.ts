@@ -6,26 +6,25 @@ import { EmailMessage, EmailCategory } from '../types';
 
 export const INITIAL_MOCK_EMAILS: EmailMessage[] = [
   {
-    id: 'mail_cr_001',
-    domainId: 'dom_cutready',
-    toAddress: 'support@cutready.app',
-    fromAddress: 'emily.design@studio9.com',
-    fromName: 'Emily Watson',
-    subject: '[CutReady Support] 批量抠图透明边缘发黑问题咨询 & 退款申诉',
-    snippet: '您好！我们今天在 CutReady 批量处理了 20 张模特白底图，导出后发现透明边缘有黑色发丝羽化瑕疵，请问是否有高质量模式？如果无法解决是否可申请退款？',
-    bodyText: `CutReady 客服团队好：
+    id: 'mail_sd_001',
+    domainId: 'dom_saas_demo',
+    toAddress: 'support@saas-demo.com',
+    fromAddress: 'alex.dev@partner-studio.com',
+    fromName: 'Alex Turner',
+    subject: '[SaaS Demo] API 并发速率与企业 Webhook 架构咨询',
+    snippet: '您好！我们正在评估 SaaS Demo 平台的自动化流水线集成能力，请问企业版是否支持自定义 Webhook 重试与高吞吐队列？',
+    bodyText: `SaaS Demo 技术团队好：
 
-我们设计工作室今天购买了 CutReady Pro 订阅（订单号 #CR-89210）。
-在尝试对一批电商模特发丝图片进行一键抠图并导出 PNG 时，发现半透明边缘存在明显的黑色发丝边缘羽化。
+我们技术团队正在调研贵平台的 API 架构与自动化流程集成方案。
+在测试批量事件处理时，有几个系统集成问题想向工程师请教：
 
-想请教一下：
-1. 客户端是否有“发丝细化”或“无反光 Alpha 通道”的高级渲染参数？
-2. 如果目前暂不支持此类型复杂高反光背景，且我们只处理了 8 张图，是否符合你们 7 天内的全额退款政策？
+1. 贵平台对外提供的 Webhook 事件推送，是否支持配置 HMAC 签名验证与自动指数退避重试？
+2. 如果我们预计在活动日有每分钟数千次的突发并发请求，是否有专用的企业高吞吐通道？
 
-期待技术支持尽快答复，感谢！
+期待技术支持专家答复，感谢！
 
-Emily Watson
-Design Lead @ Studio9`,
+Alex Turner
+Engineering Lead @ Partner Studio`,
     receivedAt: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
     isRead: false,
     isStarred: true,
@@ -33,56 +32,57 @@ Design Lead @ Studio9`,
     attachments: [],
     agentProcessed: true,
     agentInsight: {
-      summary: 'Studio9 设计总监咨询 CutReady 批量抠图发丝边缘瑕疵解决方案，并咨询 7 天未超 50 次全额退款政策。',
+      summary: 'Partner Studio 研发主管 Alex 咨询 SaaS Demo 平台的高并发 Webhook 签名安全机制与突发流量通道。',
       category: 'business',
       urgency: 'high',
       sentiment: 'neutral',
       actionItems: [
-        { id: 'act_cr_1', title: '回复 CutReady 发丝边缘模式操作指引并核对 8 张图退款资质', type: 'todo', completed: false }
+        { id: 'act_sd_1', title: '回复 Webhook HMAC 验签规范与企业并发配额文档', type: 'todo', completed: false }
       ],
       proposedReply: {
-        subject: 'Re: [CutReady Support] 批量抠图透明边缘发黑问题咨询 & 退款申诉',
-        body: `Emily 您好：
+        subject: 'Re: [SaaS Demo] API 并发速率与企业 Webhook 架构咨询',
+        body: `Alex 您好：
 
-感谢您使用 CutReady！针对您反馈的发丝边缘反光与羽化瑕疵问题，建议您在导出面板勾选「高级发丝边缘抗锯齿 (Hairline Refine)」，该模式针对浅色高光背景会进行智能去色溢出处理。
+感谢您关注 SaaS Demo！针对您咨询的系统集成问题，回复如下：
 
-关于退款政策：根据 CutReady 政策，购买 7 天内且总处理张数未满 50 次的用户，均可享受无条件全额退款。您当前处理了 8 张，完全符合退款资格。如您测试高级模式后仍不满意，可随时回复此邮件，我们将立即为您原路退款。
+1. Webhook 安全性：所有外部推送事件均包含 X-Signature-256 请求头，支持通过您的 API 密钥计算 HMAC-SHA256 验签；若目标服务暂时不可达，系统将自动执行最多 5 次指数退避重试。
+2. 企业高吞吐：企业专线通道支持每分钟 10,000+ 次高并发事件派发，并提供专属静态出口 IP 白名单支持。
 
-祝创作顺利！
+若需要申请企业沙箱环境，欢迎随时回复此邮件！
 
 Best regards,
-CutReady Technical Support
-Email: support@cutready.app
-Web: https://cutready.app`,
-        confidence: 0.95,
-        reasoning: '基于 CutReady 专属知识库：命中 7 天退款政策（未超 50 次可全额退款）及导出高级发丝模式指引。',
+SaaS Demo Technical Support
+Email: support@saas-demo.com
+Web: https://saas-demo.com`,
+        confidence: 0.96,
+        reasoning: '基于 SaaS Demo 专属知识库：精准匹配 Webhook 安全验签规范与高并发企业方案。',
         autoSent: false,
       },
       tokensUsed: { prompt: 410, completion: 180, total: 590, costUsd: 0.0006 },
       processedAt: new Date(Date.now() - 1000 * 60 * 11).toISOString(),
     },
-    labels: ['Customer Support', 'Refund', 'CutReady'],
+    labels: ['Customer Support', 'API', 'SaaSDemo'],
   },
   {
-    id: 'mail_il_001',
-    domainId: 'dom_imagelayered',
-    toAddress: 'support@image-layered.app',
-    fromAddress: 'kenji.sato@creative-art.jp',
+    id: 'mail_cs_001',
+    domainId: 'dom_cloud_stack',
+    toAddress: 'support@cloud-stack.dev',
+    fromAddress: 'kenji.sato@creative-tech.jp',
     fromName: 'Kenji Sato',
-    subject: '[Image-Layered] 导出分层 PSD 文件中文本图层能否保持可编辑？',
-    snippet: '您好！我们测试了 Image-Layered 将 AI 插画分解为 PSD 的功能，效果非常惊艳！想咨询一下图片里的海报文字在导出 PSD 后能否自动变成 Photoshop 矢量文字图层？',
-    bodyText: `Image-Layered Support Team:
+    subject: '[CloudStack] 无服务器微服务架构冷启动延迟咨询',
+    snippet: 'Hello! We recently evaluated CloudStack serverless functions for our latency-sensitive API gateway. Could you share benchmarks on cold-start mitigation?',
+    bodyText: `CloudStack Support Team:
 
-Hello! We recently tried your AI-powered image deconstruction tool to convert flat posters into layered PSD files. The object segmentation is remarkably accurate!
+Hello! We are evaluating CloudStack for our APAC edge API layer. The automated deployment pipeline is remarkably intuitive!
 
-We have a feature question:
-When the source image contains title text and slogans, does Image-Layered support recognizing the text and exporting it as editable Photoshop Type Layers (with detected font match), or are they currently exported as bitmap raster masks?
+We have a performance architecture question:
+What is the typical P99 cold-start latency for TypeScript Edge functions across Tokyo and Singapore nodes? Does CloudStack support warm worker pooling?
 
-Looking forward to hearing from you.
+Looking forward to your technical response.
 
 Best,
 Kenji Sato
-Art Director, Creative Art Tokyo`,
+Tech Lead, Creative Tech Tokyo`,
     receivedAt: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
     isRead: false,
     isStarred: false,
@@ -90,40 +90,42 @@ Art Director, Creative Art Tokyo`,
     attachments: [],
     agentProcessed: true,
     agentInsight: {
-      summary: '日本创意总监 Kenji 咨询 Image-Layered 在导出 PSD 时是否支持将文字图层转为可编辑文字图层。',
+      summary: '东京架构师 Kenji 咨询 CloudStack 边缘 Serverless 函数的 P99 冷启动时延与预热池支持。',
       category: 'business',
       urgency: 'medium',
       sentiment: 'positive',
       actionItems: [
-        { id: 'act_il_1', title: '告知 Image-Layered 当前文字图层导出机制及 OCR 矢量文字规划', type: 'todo', completed: false }
+        { id: 'act_cs_1', title: '回复 CloudStack 亚太边缘节点延迟指标与预热池配置说明', type: 'todo', completed: false }
       ],
       proposedReply: {
-        subject: 'Re: [Image-Layered] 导出分层 PSD 文件中文本图层能否保持可编辑？',
+        subject: 'Re: [CloudStack] 无服务器微服务架构冷启动延迟咨询',
         body: `Hi Kenji,
 
-Thank you for reaching out and for your wonderful feedback on Image-Layered!
+Thank you for reaching out and evaluating CloudStack!
 
-Currently, text elements are deconstructed into isolated, high-precision transparent bitmap layers within the generated PSD. 
+Regarding your performance question: Our V8 isolate-based Edge runtime maintains median cold-start times under 5ms across Tokyo (NRT) and Singapore (SIN) regions. 
 
-However, we have OCR-based editable Type Layer synthesis currently in private beta, which detects Google Fonts matches and exports true editable PSD text layers. We'd love to invite your team to the beta trial if you're interested!
+Additionally, Enterprise plans support Warm Worker Pooling, which pre-warms instances to achieve zero-latency responses for mission-critical endpoints.
+
+Feel free to reply if you'd like to test this on an APAC trial account!
 
 Cheers,
-Image Layered Customer Care
-Email: support@image-layered.app
-Web: https://image-layered.app`,
-        confidence: 0.92,
-        reasoning: '基于 Image-Layered 专属知识库：当前版本图层拆分为位图掩膜，OCR 矢量文字处于内测，积极引导试用。',
+CloudStack Dev Support
+Email: support@cloud-stack.dev
+Web: https://cloud-stack.dev`,
+        confidence: 0.94,
+        reasoning: '基于 CloudStack 专属知识库：准确解答 V8 Isolate 冷启动性能与预热池特性。',
         autoSent: false,
       },
       tokensUsed: { prompt: 380, completion: 150, total: 530, costUsd: 0.0005 },
       processedAt: new Date(Date.now() - 1000 * 60 * 24).toISOString(),
     },
-    labels: ['Feature Request', 'PSD', 'ImageLayered'],
+    labels: ['Architecture', 'Performance', 'CloudStack'],
   },
   {
     id: 'mail_001',
     domainId: 'dom_1',
-    toAddress: 'auth@mytech.dev',
+    toAddress: 'auth@tech-corp.org',
     fromAddress: 'noreply@github.com',
     fromName: 'GitHub Security',
     subject: '[GitHub] Please verify your device: 839201',
@@ -338,41 +340,41 @@ export function generateRandomMockEmail(domain: string, alias?: string): EmailMe
     },
   ];
 
-  const cutreadyTemplates: MockTemplate[] = [
+  const saasDemoTemplates: MockTemplate[] = [
     {
-      from: 'designer.mark@ecomgrowth.io',
-      fromName: 'Mark Chen',
-      subject: '[CutReady] 批量处理电商白底图发丝去反光咨询',
-      body: '你好，我们网店近期需要批量处理 500 张服饰模特图，请问 CutReady API 是否支持通过 Webhook 异步回调结果？另外是否有企业并发加速通道？',
+      from: 'alex.lead@devteam.io',
+      fromName: 'Alex Turner',
+      subject: '[SaaS Demo] 企业版高并发 API 配额咨询',
+      body: '你好，我们近期计划接入 SaaS Demo 的云端服务，预计日均请求量在 50 万次以上，请问是否有企业级并发通道与 SLA 保障？',
       category: 'business',
       urgency: 'high',
     },
     {
-      from: 'support@payment-gateway.com',
+      from: 'billing@cloud-gateway.com',
       fromName: 'Billing Service',
-      subject: 'CutReady Pro 订阅扣费通知（$19.00 USD）',
-      body: '您的 CutReady Pro 月度计划已成功扣费 $19.00 USD。交易凭据可在控制台随时下载。',
+      subject: 'SaaS Demo Pro 订阅扣费通知（$29.00 USD）',
+      body: '您的 SaaS Demo Pro 月度计划已成功扣费 $29.00 USD。电子收据已归档入库。',
       category: 'transactional',
       urgency: 'low',
     }
   ];
 
-  const imageLayeredTemplates: MockTemplate[] = [
+  const cloudStackTemplates: MockTemplate[] = [
     {
-      from: 'sarah.ux@fintechapp.com',
+      from: 'sarah.cloud@fintech.io',
       fromName: 'Sarah Jenkins',
-      subject: '[Image-Layered] UI 界面截屏转 PSD 图层分组反馈',
-      body: 'Hi Image Layered team! We tried converting app screenshots to editable PSD files. The button and icon layer hierarchy is very clean. Can we expect Figma plugin support soon?',
+      subject: '[CloudStack] 亚太边缘节点低延迟评测反馈',
+      body: 'Hi CloudStack team! We tested the Edge function routing across Tokyo and Singapore. Cold-start times are very impressive! Do you provide Terraform providers?',
       category: 'business',
       urgency: 'medium',
     }
   ];
 
   let pool: MockTemplate[] = genericTemplates;
-  if (domain.includes('cutready')) {
-    pool = cutreadyTemplates;
-  } else if (domain.includes('image-layered')) {
-    pool = imageLayeredTemplates;
+  if (domain.includes('saas-demo') || domain.includes('demo')) {
+    pool = saasDemoTemplates;
+  } else if (domain.includes('cloud-stack')) {
+    pool = cloudStackTemplates;
   }
 
   const t = pool[Math.floor(Math.random() * pool.length)];

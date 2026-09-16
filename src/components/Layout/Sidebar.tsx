@@ -81,7 +81,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               fontWeight: 700,
               fontSize: '15px',
               letterSpacing: '-0.02em',
-              color: '#fff',
+              color: 'var(--text-white)',
               display: 'flex',
               alignItems: 'center',
               gap: '6px'
@@ -153,7 +153,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             borderRadius: '6px',
             marginBottom: '3px',
             background: currentView === 'inbox' && !selectedDomainId ? 'rgba(99, 102, 241, 0.15)' : 'transparent',
-            color: currentView === 'inbox' && !selectedDomainId ? '#fff' : 'var(--text-muted)',
+            color: currentView === 'inbox' && !selectedDomainId ? 'var(--text-white)' : 'var(--text-muted)',
             fontWeight: currentView === 'inbox' && !selectedDomainId ? 600 : 400,
             fontSize: '13px',
           }}
@@ -187,7 +187,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             borderRadius: '6px',
             marginBottom: '3px',
             background: currentView === 'agent' ? 'rgba(139, 92, 246, 0.18)' : 'transparent',
-            color: currentView === 'agent' ? '#c4b5fd' : 'var(--text-muted)',
+            color: currentView === 'agent' ? 'var(--accent-primary)' : 'var(--text-muted)',
             fontWeight: currentView === 'agent' ? 600 : 400,
             fontSize: '13px',
           }}
@@ -225,7 +225,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             borderRadius: '6px',
             marginBottom: '3px',
             background: currentView === 'domains' ? 'rgba(99, 102, 241, 0.15)' : 'transparent',
-            color: currentView === 'domains' ? '#fff' : 'var(--text-muted)',
+            color: currentView === 'domains' ? 'var(--text-white)' : 'var(--text-muted)',
             fontWeight: currentView === 'domains' ? 600 : 400,
             fontSize: '13px',
           }}
@@ -284,7 +284,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     padding: '7px 10px',
                     borderRadius: '6px',
                     background: isDomSelected && !selectedAliasId ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
-                    color: isDomSelected && !selectedAliasId ? '#fff' : 'var(--text-main)',
+                    color: isDomSelected && !selectedAliasId ? 'var(--text-white)' : 'var(--text-main)',
                     fontSize: '12px',
                     fontWeight: 500,
                   }}
@@ -341,7 +341,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           padding: '5px 8px',
                           borderRadius: '5px',
                           fontSize: '11px',
-                          color: isAliasSelected ? '#fff' : al.isActive === false ? 'rgba(255,255,255,0.25)' : 'var(--text-muted)',
+                          color: isAliasSelected ? 'var(--text-white)' : al.isActive === false ? 'rgba(128,128,128,0.35)' : 'var(--text-muted)',
                           background: isAliasSelected ? 'linear-gradient(90deg, rgba(99, 102, 241, 0.25) 0%, rgba(139, 92, 246, 0.15) 100%)' : 'transparent',
                           border: isAliasSelected ? '1px solid rgba(99, 102, 241, 0.4)' : '1px solid transparent',
                           opacity: al.isActive === false ? 0.6 : 1,
@@ -364,7 +364,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           {aliasUnread > 0 ? (
                             <span style={{ 
                               fontSize: '10px', 
-                              color: '#fff', 
+                              color: 'var(--text-white)', 
                               background: '#ef4444', 
                               padding: '0 5px', 
                               borderRadius: '999px',
@@ -421,7 +421,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             alignItems: 'center',
             justifyContent: 'center'
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = '#fff')}
+          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-white)')}
           onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
           title={t('sidebar.settings')}
         >

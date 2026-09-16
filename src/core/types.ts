@@ -98,7 +98,7 @@ export interface DomainAlias {
   emailCount: number;
   isActive: boolean;
   autoReplyEnabled: boolean;
-  displayName?: string;    // 发信显示名，如 "CutReady Support"
+  displayName?: string;    // 发信显示名，如 "SaaS Demo Support"
   aiPersona?: string;      // 专属客服人设与知识库 Prompt
   signature?: string;      // 专属邮件 HTML 签名
 }

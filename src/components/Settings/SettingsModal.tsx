@@ -64,7 +64,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [initDbMsg, setInitDbMsg] = useState<{ ok: boolean; message: string } | null>(null);
 
   // DNS 连通性体检弹窗状态
-  const [dnsTestDomain, setDnsTestDomain] = useState('cutready.app');
+  const [dnsTestDomain, setDnsTestDomain] = useState('saas-demo.com');
   const [showDnsModal, setShowDnsModal] = useState(false);
 
   const handleTestCloudflare = async () => {
@@ -790,7 +790,7 @@ export default {
                 />
 
                 <div style={{ fontSize: '11.5px', color: 'var(--text-dim)', lineHeight: '1.5' }}>
-                  填入此邮箱后，所有托管域名（如 <code>support@cutready.app</code>）收到的邮件均会自动静默抄送一份至该地址备份；若留空则仅存入 Cloudflare D1。
+                  填入此邮箱后，所有托管域名（如 <code>support@saas-demo.com</code>）收到的邮件均会自动静默抄送一份至该地址备份；若留空则仅存入 Cloudflare D1。
                 </div>
               </div>
 
@@ -1042,7 +1042,7 @@ export default {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <input
                         type="text"
-                        placeholder="输入域名 (如 cutready.app)"
+                        placeholder="输入域名 (如 saas-demo.com)"
                         value={dnsTestDomain}
                         onChange={(e) => setDnsTestDomain(e.target.value)}
                         style={{

@@ -117,7 +117,7 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        background: 'rgba(15, 22, 41, 0.65)',
+        background: 'var(--bg-surface)',
         backdropFilter: 'blur(12px)',
         position: 'sticky',
         top: 0,
@@ -132,11 +132,11 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
                 height: '32px',
                 borderRadius: '8px',
                 border: '1px solid var(--border-subtle)',
-                color: '#fff',
+                color: 'var(--text-white)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: 'rgba(255, 255, 255, 0.06)'
+                background: 'rgba(0, 0, 0, 0.04)'
               }}
               title={t('common.back')}
             >
@@ -297,7 +297,7 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
             fontSize: '18px',
             fontWeight: 700,
             fontFamily: 'var(--font-heading)',
-            color: '#ffffff',
+            color: 'var(--text-white)',
             lineHeight: 1.3,
             marginBottom: '10px'
           }}>
@@ -327,7 +327,7 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
                 {(email.fromName || email.fromAddress)[0].toUpperCase()}
               </div>
               <div>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: '#fff' }}>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-white)' }}>
                   {email.fromName || email.fromAddress}
                 </div>
                 <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -435,7 +435,7 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
                     alignItems: 'center',
                     gap: '8px',
                     fontSize: '12px',
-                    color: '#fff'
+                    color: 'var(--text-white)'
                   }}
                 >
                   <FileText size={16} color="#818cf8" />
@@ -461,7 +461,7 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Sparkles size={14} color="#818cf8" />
-                <span style={{ fontSize: '12px', fontWeight: 600, color: '#fff' }}>{t('emailDetail.reply')}</span>
+                <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-white)' }}>{t('emailDetail.reply')}</span>
               </div>
 
               <button

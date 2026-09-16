@@ -57,7 +57,7 @@ export const EmailComposer: React.FC<EmailComposerProps> = ({
   const initialOption = senderOptions.find(s => s.address === defaultSenderAddress) || senderOptions[0];
 
   const [selectedSender, setSelectedSender] = useState<SenderOption>(
-    initialOption || { address: 'support@cutready.app', label: 'support@cutready.app', displayName: 'Support' }
+    initialOption || { address: 'support@saas-demo.com', label: 'support@saas-demo.com', displayName: 'Support' }
   );
   const [toAddress, setToAddress] = useState('');
   const [subject, setSubject] = useState('');
@@ -143,7 +143,7 @@ export const EmailComposer: React.FC<EmailComposerProps> = ({
           justifyContent: 'space-between',
           background: 'rgba(255, 255, 255, 0.02)'
         }}>
-          <div style={{ fontSize: '15px', fontWeight: 700, color: '#fff' }}>
+          <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-white)' }}>
             {t('composer.title')}
           </div>
           <button onClick={onClose} style={{ color: 'var(--text-dim)' }}>
@@ -201,13 +201,13 @@ export const EmailComposer: React.FC<EmailComposerProps> = ({
                     {d.aliases.map(a => {
                       const labelText = a.displayName ? `${a.displayName} <${a.fullAddress}>` : a.fullAddress;
                       return (
-                        <option key={a.id} value={a.fullAddress} style={{ background: '#0f172a', color: '#fff', fontWeight: 400 }}>
+                        <option key={a.id} value={a.fullAddress} style={{ background: 'var(--bg-surface)', color: 'var(--text-main)', fontWeight: 400 }}>
                           {labelText} {a.description ? `— ${a.description}` : ''}
                         </option>
                       );
                     })}
                     {!d.aliases.some(a => a.prefix === 'contact') && (
-                      <option value={`contact@${d.domain}`} style={{ background: '#0f172a', color: '#fff', fontWeight: 400 }}>
+                      <option value={`contact@${d.domain}`} style={{ background: 'var(--bg-surface)', color: 'var(--text-main)', fontWeight: 400 }}>
                         {d.displayName || 'Official'} &lt;contact@{d.domain}&gt;
                       </option>
                     )}
@@ -231,9 +231,9 @@ export const EmailComposer: React.FC<EmailComposerProps> = ({
                 width: '100%',
                 padding: '8px 12px',
                 borderRadius: '8px',
-                background: 'rgba(0, 0, 0, 0.4)',
+                background: 'rgba(0, 0, 0, 0.05)',
                 border: '1px solid var(--border-subtle)',
-                color: '#fff',
+                color: 'var(--text-main)',
                 fontSize: '13px'
               }}
             />
@@ -253,9 +253,9 @@ export const EmailComposer: React.FC<EmailComposerProps> = ({
                 width: '100%',
                 padding: '8px 12px',
                 borderRadius: '8px',
-                background: 'rgba(0, 0, 0, 0.4)',
+                background: 'rgba(0, 0, 0, 0.05)',
                 border: '1px solid var(--border-subtle)',
-                color: '#fff',
+                color: 'var(--text-main)',
                 fontSize: '13px'
               }}
             />
@@ -295,9 +295,9 @@ export const EmailComposer: React.FC<EmailComposerProps> = ({
                 width: '100%',
                 padding: '12px',
                 borderRadius: '8px',
-                background: 'rgba(0, 0, 0, 0.4)',
+                background: 'rgba(0, 0, 0, 0.05)',
                 border: '1px solid var(--border-subtle)',
-                color: '#fff',
+                color: 'var(--text-main)',
                 fontSize: '13px',
                 lineHeight: 1.6,
                 resize: 'vertical'

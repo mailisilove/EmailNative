@@ -55,13 +55,13 @@ export const EmailList: React.FC<EmailListProps> = ({
   };
 
   const getProductBadge = (toAddress: string) => {
-    if (toAddress.includes('cutready')) {
-      return { name: 'CutReady', color: '#38bdf8', bg: 'rgba(56, 189, 248, 0.12)', border: 'rgba(56, 189, 248, 0.3)' };
+    if (toAddress.includes('saas-demo')) {
+      return { name: 'SaaS Demo', color: '#0284c7', bg: 'rgba(56, 189, 248, 0.15)', border: 'rgba(56, 189, 248, 0.35)' };
     }
-    if (toAddress.includes('image-layered')) {
-      return { name: 'ImageLayered', color: '#c084fc', bg: 'rgba(192, 132, 252, 0.12)', border: 'rgba(192, 132, 252, 0.3)' };
+    if (toAddress.includes('cloud-stack')) {
+      return { name: 'CloudStack', color: '#7c3aed', bg: 'rgba(192, 132, 252, 0.15)', border: 'rgba(192, 132, 252, 0.35)' };
     }
-    return { name: toAddress.split('@')[1] || 'Domain', color: '#94a3b8', bg: 'rgba(255, 255, 255, 0.06)', border: 'rgba(255, 255, 255, 0.12)' };
+    return { name: toAddress.split('@')[1] || 'Domain', color: 'var(--text-muted)', bg: 'rgba(0, 0, 0, 0.05)', border: 'var(--border-subtle)' };
   };
 
   if (emails.length === 0) {
@@ -154,7 +154,7 @@ export const EmailList: React.FC<EmailListProps> = ({
                 <span style={{
                   fontSize: isMobile ? '15px' : '13px',
                   fontWeight: email.isRead ? 500 : 700,
-                  color: email.isRead ? 'var(--text-muted)' : '#ffffff',
+                  color: email.isRead ? 'var(--text-muted)' : 'var(--text-white)',
                   whiteSpace: 'nowrap',
                   textOverflow: 'ellipsis',
                   overflow: 'hidden'
