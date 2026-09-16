@@ -13,12 +13,15 @@ import {
   Lock, 
   Database, 
   RefreshCw, 
-  Globe 
+  Globe,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { CloudflareConfig, LLMConfig, OutboundMailConfig } from '../../core/types';
 import { CloudflareWorkerClient } from '../../core/email-gateway/cf-worker-client';
 import { DnsInspectorModal } from '../Domains/DnsInspectorModal';
 import { useI18n } from '../../core/i18n/I18nContext';
+import { useTheme } from '../../core/theme/useTheme';
 import { LanguageToggle } from '../Common/LanguageToggle';
 
 interface SettingsModalProps {
@@ -43,6 +46,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onSaveOutboundConfig,
 }) => {
   const { t, language, setLanguage } = useI18n();
+  const { theme, setTheme } = useTheme();
   const [activeTab, setActiveTab] = useState<'general' | 'llm' | 'cloudflare' | 'outbound' | 'worker_code'>('general');
 
   // 本地表单状态
@@ -353,6 +357,113 @@ export default {
                     </div>
                     {language === 'en' && (
                       <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Check size={12} color="#fff" />
+                      </div>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* 主题风格外观切换 */}
+              <div>
+                <label style={{ fontSize: '13px', color: 'var(--text-white)', fontWeight: 600, display: 'block', marginBottom: '6px' }}>
+                  {t('settings.themeSelectTitle')}
+                </label>
+                <p style={{ fontSize: '12px', color: 'var(--text-dim)', marginBottom: '14px', lineHeight: 1.5 }}>
+                  {t('settings.themeSelectDesc')}
+                </p>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  {/* 深色模式 */}
+                  <button
+                    type="button"
+                    onClick={() => setTheme('dark')}
+                    style={{
+                      padding: '16px',
+                      borderRadius: '10px',
+                      border: theme === 'dark' ? '2px solid #818cf8' : '1px solid var(--border-subtle)',
+                      background: theme === 'dark' ? 'rgba(99, 102, 241, 0.12)' : 'rgba(255, 255, 255, 0.02)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '8px',
+                        background: '#090d16',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#38bdf8',
+                      }}>
+                        <Moon size={18} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '14px', fontWeight: 600, color: theme === 'dark' ? 'var(--text-white)' : 'var(--text-muted)' }}>
+                          {t('settings.themeDarkName')}
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '2px' }}>
+                          {t('settings.themeDarkDesc')}
+                        </div>
+                      </div>
+                    </div>
+                    {theme === 'dark' && (
+                      <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <Check size={12} color="#fff" />
+                      </div>
+                    )}
+                  </button>
+
+                  {/* 浅色模式 */}
+                  <button
+                    type="button"
+                    onClick={() => setTheme('light')}
+                    style={{
+                      padding: '16px',
+                      borderRadius: '10px',
+                      border: theme === 'light' ? '2px solid #818cf8' : '1px solid var(--border-subtle)',
+                      background: theme === 'light' ? 'rgba(99, 102, 241, 0.12)' : 'rgba(255, 255, 255, 0.02)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '8px',
+                        background: '#ffffff',
+                        border: '1px solid rgba(0, 0, 0, 0.15)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#f59e0b',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                      }}>
+                        <Sun size={18} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '14px', fontWeight: 600, color: theme === 'light' ? 'var(--text-white)' : 'var(--text-muted)' }}>
+                          {t('settings.themeLightName')}
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '2px' }}>
+                          {t('settings.themeLightDesc')}
+                        </div>
+                      </div>
+                    </div>
+                    {theme === 'light' && (
+                      <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <Check size={12} color="#fff" />
                       </div>
                     )}

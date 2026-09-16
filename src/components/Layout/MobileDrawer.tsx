@@ -15,6 +15,7 @@ import {
 import { ManagedDomain } from '../../core/types';
 import { useI18n } from '../../core/i18n/I18nContext';
 import { LanguageToggle } from '../Common/LanguageToggle';
+import { ThemeToggle } from '../Common/ThemeToggle';
 
 interface MobileDrawerProps {
   isOpen: boolean;
@@ -379,7 +380,10 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
           background: 'rgba(0, 0, 0, 0.3)',
           gap: '8px'
         }}>
-          <LanguageToggle compact />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <ThemeToggle compact />
+            <LanguageToggle compact />
+          </div>
 
           <button
             onClick={() => {

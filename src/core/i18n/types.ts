@@ -23,6 +23,10 @@ export interface Translations {
     language: string;
     zh: string;
     en: string;
+    theme: string;
+    themeDark: string;
+    themeLight: string;
+    themeTooltip: string;
     all: string;
     none: string;
     or: string;
@@ -58,6 +62,7 @@ export interface Translations {
     simulateTooltip: string;
     syncTooltip: string;
     langTooltip: string;
+    themeTooltip: string;
     emergencyStop: string;
     analyzingEmail: string;
   };
@@ -202,6 +207,12 @@ export interface Translations {
     langSelectDesc: string;
     langZh: string;
     langEn: string;
+    themeSelectTitle: string;
+    themeSelectDesc: string;
+    themeDarkName: string;
+    themeDarkDesc: string;
+    themeLightName: string;
+    themeLightDesc: string;
     saveAll: string;
     saving: string;
     savedNotice: string;

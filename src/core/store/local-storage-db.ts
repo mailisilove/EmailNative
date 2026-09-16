@@ -24,6 +24,7 @@ const STORAGE_KEYS = {
   CF_CONFIG: 'emailnative_cf_config_v1',
   OUTBOUND_CONFIG: 'emailnative_outbound_config_v1',
   LANGUAGE: 'emailnative_lang_v1',
+  THEME: 'emailnative_theme_v1',
 };
 
 export class LocalStorageDB {
@@ -244,6 +245,28 @@ export class LocalStorageDB {
       }
     } catch (err) {
       console.error('Save language failed', err);
+    }
+  }
+
+  // ----------------- 界面主题 -----------------
+  static getTheme(): 'dark' | 'light' {
+    if (typeof window === 'undefined') return 'dark';
+    try {
+      const stored = localStorage.getItem(STORAGE_KEYS.THEME);
+      if (stored === 'dark' || stored === 'light') return stored;
+      return 'dark'; // 默认保留科技感深色暗黑，用户可随时切换浅色白色
+    } catch {
+      return 'dark';
+    }
+  }
+
+  static saveTheme(theme: 'dark' | 'light'): void {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem(STORAGE_KEYS.THEME, theme);
+      }
+    } catch (err) {
+      console.error('Save theme failed', err);
     }
   }
 }

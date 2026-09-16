@@ -14,6 +14,7 @@ import {
 import { ManagedDomain } from '../../core/types';
 import { useI18n } from '../../core/i18n/I18nContext';
 import { LanguageToggle } from '../Common/LanguageToggle';
+import { ThemeToggle } from '../Common/ThemeToggle';
 
 interface HeaderProps {
   searchQuery: string;
@@ -96,7 +97,7 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             )}
 
-            <h1 style={{ fontSize: '20px', fontWeight: 700, color: '#fff', margin: 0, letterSpacing: '-0.02em' }}>
+            <h1 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-white)', margin: 0, letterSpacing: '-0.02em' }}>
               {selectedAliasPrefix 
                 ? `${selectedAliasPrefix}@` 
                 : (selectedDomain?.displayName || selectedDomain?.domain || t('header.inbox'))}
@@ -132,6 +133,7 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             )}
 
+            <ThemeToggle compact />
             <LanguageToggle compact />
 
             <button
@@ -303,7 +305,8 @@ export const Header: React.FC<HeaderProps> = ({
         className="app-region-no-drag"
         style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
       >
-        {/* 语言切换按钮 */}
+        {/* 主题切换与语言切换 */}
+        <ThemeToggle compact />
         <LanguageToggle compact />
 
         {/* Token 消耗徽章 */}
