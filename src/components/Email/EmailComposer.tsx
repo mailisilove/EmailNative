@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Send, Sparkles, AlertCircle } from 'lucide-react';
 import { ManagedDomain } from '../../core/types';
+import { useI18n } from '../../core/i18n/I18nContext';
 
 interface SenderOption {
   address: string;
@@ -26,6 +27,8 @@ export const EmailComposer: React.FC<EmailComposerProps> = ({
   onOpenSettings,
   defaultSenderAddress,
 }) => {
+  const { t } = useI18n();
+
   // 整理所有可选的发信身份（含显示名与签名）
   const senderOptions: SenderOption[] = [];
   domains.forEach(d => {
@@ -89,11 +92,11 @@ export const EmailComposer: React.FC<EmailComposerProps> = ({
 
   const handleSend = async () => {
     if (!toAddress) {
-      setErrorMsg('请填写收件人邮箱');
+      setErrorMsg(t('composer.fillRecipient'));
       return;
     }
     if (!subject) {
-      setErrorMsg('请填写邮件主题');
+      setErrorMsg(t('composer.fillSubject'));
       return;
     }
     setErrorMsg('');
@@ -103,7 +106,7 @@ export const EmailComposer: React.FC<EmailComposerProps> = ({
     if (res.success) {
       onClose();
     } else {
-      setErrorMsg(res.error || '发送失败，请检查发信提供商配置');
+      setErrorMsg(res.error || t('emailDetail.sendFailed'));
     }
   };
 
@@ -141,7 +144,7 @@ export const EmailComposer: React.FC<EmailComposerProps> = ({
           background: 'rgba(255, 255, 255, 0.02)'
         }}>
           <div style={{ fontSize: '15px', fontWeight: 700, color: '#fff' }}>
-            撰写出站邮件
+            {t('composer.title')}
           </div>
           <button onClick={onClose} style={{ color: 'var(--text-dim)' }}>
             <X size={18} />
@@ -170,7 +173,7 @@ export const EmailComposer: React.FC<EmailComposerProps> = ({
           {/* 发信地址选择 */}
           <div>
             <label style={{ fontSize: '11px', color: 'var(--text-dim)', fontWeight: 600, display: 'block', marginBottom: '6px' }}>
-              发件域名邮箱 (FROM)
+              {t('composer.senderIdentity')}
             </label>
             <select
               value={selectedSender.address}
@@ -217,11 +220,11 @@ export const EmailComposer: React.FC<EmailComposerProps> = ({
           {/* 收件地址 */}
           <div>
             <label style={{ fontSize: '11px', color: 'var(--text-dim)', fontWeight: 600, display: 'block', marginBottom: '6px' }}>
-              收件人 (TO)
+              {t('composer.recipient')}
             </label>
             <input
               type="email"
-              placeholder="recipient@example.com"
+              placeholder={t('composer.recipientPlaceholder')}
               value={toAddress}
               onChange={(e) => setToAddress(e.target.value)}
               style={{
@@ -239,11 +242,11 @@ export const EmailComposer: React.FC<EmailComposerProps> = ({
           {/* 主题 */}
           <div>
             <label style={{ fontSize: '11px', color: 'var(--text-dim)', fontWeight: 600, display: 'block', marginBottom: '6px' }}>
-              邮件主题
+              {t('composer.subject')}
             </label>
             <input
               type="text"
-              placeholder="邮件主题..."
+              placeholder={t('composer.subjectPlaceholder')}
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               style={{
@@ -262,7 +265,7 @@ export const EmailComposer: React.FC<EmailComposerProps> = ({
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
               <label style={{ fontSize: '11px', color: 'var(--text-dim)', fontWeight: 600 }}>
-                邮件正文
+                {t('composer.body')}
               </label>
               <button
                 type="button"
@@ -280,12 +283,12 @@ export const EmailComposer: React.FC<EmailComposerProps> = ({
                 }}
               >
                 <Sparkles size={12} />
-                <span>{isAiPolishing ? 'AI 扩写中...' : 'Agent 扩写润色'}</span>
+                <span>{isAiPolishing ? t('composer.aiPolishing') : t('composer.aiPolish')}</span>
               </button>
             </div>
             <textarea
               rows={8}
-              placeholder="输入正文，或简写要点后点击右上角 Agent 扩写润色..."
+              placeholder={t('composer.bodyPlaceholder')}
               value={body}
               onChange={(e) => setBody(e.target.value)}
               style={{
@@ -344,7 +347,7 @@ export const EmailComposer: React.FC<EmailComposerProps> = ({
                       cursor: 'pointer'
                     }}
                   >
-                    配置发信
+                    {t('common.status')}
                   </button>
                 )}
               </div>
@@ -361,7 +364,7 @@ export const EmailComposer: React.FC<EmailComposerProps> = ({
                 color: 'var(--text-muted)'
               }}
             >
-              取消
+              {t('common.cancel')}
             </button>
             <button
               onClick={handleSend}
@@ -380,7 +383,7 @@ export const EmailComposer: React.FC<EmailComposerProps> = ({
               }}
             >
               <Send size={14} />
-              <span>{isSending ? '发送中...' : '立即发送'}</span>
+              <span>{isSending ? t('composer.sending') : t('composer.send')}</span>
             </button>
           </div>
         </div>

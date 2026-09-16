@@ -2,23 +2,20 @@ import React, { useState } from 'react';
 import { 
   Star, 
   Archive, 
-  Trash2, 
   Sparkles, 
   Send, 
-  Paperclip, 
   CheckCircle2, 
-  Clock, 
-  AlertCircle,
+  AlertCircle, 
+  Calendar, 
+  CreditCard, 
+  Edit3, 
   FileText,
-  Calendar,
-  CreditCard,
-  Edit3,
-  Bot,
-  ChevronLeft
+  ChevronLeft 
 } from 'lucide-react';
 import { EmailMessage } from '../../core/types';
 import { VerificationCodeCard } from './VerificationCodeCard';
 import { DeepSeekReasoningBox } from './DeepSeekReasoningBox';
+import { useI18n } from '../../core/i18n/I18nContext';
 
 interface EmailDetailProps {
   email: EmailMessage | null;
@@ -39,6 +36,7 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
   onOpenSettings,
   onBack,
 }) => {
+  const { t } = useI18n();
   const [replyText, setReplyText] = useState('');
   const [isEditingDraft, setIsEditingDraft] = useState(false);
   const [isSending, setIsSending] = useState(false);
@@ -69,7 +67,7 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
         }}>
           <Sparkles size={24} color="#6366f1" />
         </div>
-        <p style={{ fontSize: '14px', fontWeight: 500 }}>请在左侧列表选择一封邮件进行查看与 Agent 处理</p>
+        <p style={{ fontSize: '14px', fontWeight: 500 }}>{t('emailDetail.emptyPrompt')}</p>
       </div>
     );
   }
@@ -93,7 +91,7 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
       setSentSuccess(true);
       setTimeout(() => setSentSuccess(false), 3000);
     } else {
-      setReplyError(res.error || '发信失败，请检查发信通道配置');
+      setReplyError(res.error || t('emailDetail.sendFailed'));
     }
   };
 
@@ -134,7 +132,7 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
                 justifyContent: 'center',
                 background: 'rgba(255, 255, 255, 0.06)'
               }}
-              title="返回"
+              title={t('common.back')}
             >
               <ChevronLeft size={18} />
             </button>
@@ -152,7 +150,7 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
               justifyContent: 'center',
               background: 'rgba(255, 255, 255, 0.04)'
             }}
-            title={email.isStarred ? '取消收藏' : '收藏'}
+            title={email.isStarred ? t('emailList.unmarkStar') : t('emailList.markStar')}
           >
             <Star size={15} fill={email.isStarred ? '#f59e0b' : 'none'} />
           </button>
@@ -170,7 +168,7 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
               justifyContent: 'center',
               background: 'rgba(255, 255, 255, 0.04)'
             }}
-            title="归档"
+            title={t('emailDetail.archive')}
           >
             <Archive size={15} />
           </button>
@@ -192,7 +190,7 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
           }}
         >
           <Sparkles size={12} color="#a78bfa" />
-          <span>重新分析</span>
+          <span>{t('emailList.runAgent')}</span>
         </button>
       </div>
 
@@ -373,7 +371,7 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Sparkles size={14} color="#818cf8" />
-                <span style={{ fontSize: '12px', fontWeight: 600, color: '#fff' }}>建议回复</span>
+                <span style={{ fontSize: '12px', fontWeight: 600, color: '#fff' }}>{t('emailDetail.reply')}</span>
               </div>
 
               <button
@@ -391,7 +389,7 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
                 }}
               >
                 <Edit3 size={11} />
-                <span>{isEditingDraft ? '取消' : '编辑'}</span>
+                <span>{isEditingDraft ? t('common.cancel') : t('common.edit')}</span>
               </button>
             </div>
 
@@ -457,7 +455,7 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
                       whiteSpace: 'nowrap'
                     }}
                   >
-                    设置
+                    {t('common.status')}
                   </button>
                 )}
               </div>
@@ -466,7 +464,7 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
               {sentSuccess ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#10b981', fontSize: '12px', fontWeight: 600 }}>
-                  <CheckCircle2 size={14} /> 已发送
+                  <CheckCircle2 size={14} /> {t('common.saved')}
                 </div>
               ) : (
                 <button
@@ -486,7 +484,7 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
                   }}
                 >
                   <Send size={12} />
-                  <span>{isSending ? '发送中...' : '发送'}</span>
+                  <span>{isSending ? t('emailDetail.sending') : t('emailDetail.approveAndSend')}</span>
                 </button>
               )}
             </div>

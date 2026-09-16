@@ -7,13 +7,14 @@ import {
   Briefcase, 
   Mail, 
   X, 
-  ChevronRight, 
   Settings, 
   Plus, 
   Globe,
   CircleDot
 } from 'lucide-react';
 import { ManagedDomain } from '../../core/types';
+import { useI18n } from '../../core/i18n/I18nContext';
+import { LanguageToggle } from '../Common/LanguageToggle';
 
 interface MobileDrawerProps {
   isOpen: boolean;
@@ -57,15 +58,16 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
   onOpenSettings,
   onNewEmail,
 }) => {
+  const { t } = useI18n();
   if (!isOpen) return null;
 
   const categories = [
-    { id: 'all', label: '全部邮件', icon: Inbox, count: categoryCounts.all, color: '#818cf8' },
-    { id: 'unread', label: '未读邮件', icon: CircleDot, count: categoryCounts.unread, color: '#38bdf8' },
-    { id: 'starred', label: '星标收藏', icon: Star, count: categoryCounts.starred, color: '#f59e0b' },
-    { id: 'verification', label: '验证码', icon: ShieldCheck, count: categoryCounts.verification, color: '#6366f1' },
-    { id: 'transactional', label: '财务账单', icon: Receipt, count: categoryCounts.transactional, color: '#10b981' },
-    { id: 'business', label: '重要沟通', icon: Briefcase, count: categoryCounts.business, color: '#c084fc' },
+    { id: 'all', label: t('emailList.all'), icon: Inbox, count: categoryCounts.all, color: '#818cf8' },
+    { id: 'unread', label: t('emailList.unread'), icon: CircleDot, count: categoryCounts.unread, color: '#38bdf8' },
+    { id: 'starred', label: t('emailList.starred'), icon: Star, count: categoryCounts.starred, color: '#f59e0b' },
+    { id: 'verification', label: t('emailList.verification'), icon: ShieldCheck, count: categoryCounts.verification, color: '#6366f1' },
+    { id: 'transactional', label: t('emailList.transactional'), icon: Receipt, count: categoryCounts.transactional, color: '#10b981' },
+    { id: 'business', label: t('emailList.business'), icon: Briefcase, count: categoryCounts.business, color: '#c084fc' },
   ];
 
   return (
@@ -367,15 +369,18 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
           </div>
         </div>
 
-        {/* 底部按钮栏 */}
+        {/* 底部写信与快捷设置 */}
         <div style={{
           padding: '12px 16px',
           borderTop: '1px solid var(--border-subtle)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          background: 'rgba(0, 0, 0, 0.2)',
+          background: 'rgba(0, 0, 0, 0.3)',
+          gap: '8px'
         }}>
+          <LanguageToggle compact />
+
           <button
             onClick={() => {
               onClose();
@@ -394,7 +399,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
             }}
           >
             <Plus size={14} />
-            <span>写信</span>
+            <span>{t('sidebar.compose')}</span>
           </button>
 
           <button
@@ -412,6 +417,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
               color: 'var(--text-muted)',
               background: 'rgba(255, 255, 255, 0.05)',
             }}
+            title={t('sidebar.settings')}
           >
             <Settings size={16} />
           </button>

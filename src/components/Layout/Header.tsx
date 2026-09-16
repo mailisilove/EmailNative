@@ -11,6 +11,8 @@ import {
   Menu
 } from 'lucide-react';
 import { ManagedDomain } from '../../core/types';
+import { useI18n } from '../../core/i18n/I18nContext';
+import { LanguageToggle } from '../Common/LanguageToggle';
 
 interface HeaderProps {
   searchQuery: string;
@@ -45,6 +47,7 @@ export const Header: React.FC<HeaderProps> = ({
   onNewEmail,
   onOpenMobileDrawer,
 }) => {
+  const { t } = useI18n();
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   // 移动端极简顶栏
@@ -82,7 +85,7 @@ export const Header: React.FC<HeaderProps> = ({
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
-                title="选择域名与邮件分类"
+                title={t('mobile.selectDomainAndCategory')}
               >
                 <Menu size={18} />
               </button>
@@ -91,7 +94,7 @@ export const Header: React.FC<HeaderProps> = ({
             <h1 style={{ fontSize: '20px', fontWeight: 700, color: '#fff', margin: 0, letterSpacing: '-0.02em' }}>
               {selectedAliasPrefix 
                 ? `${selectedAliasPrefix}@` 
-                : (selectedDomain?.displayName || selectedDomain?.domain || '收件箱')}
+                : (selectedDomain?.displayName || selectedDomain?.domain || t('header.inbox'))}
             </h1>
             {isProcessing && (
               <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#c084fc', boxShadow: '0 0 8px #c084fc' }} />
@@ -100,6 +103,8 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* 右侧轻量动作区 */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <LanguageToggle compact />
+
             <button
               onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
               style={{
@@ -162,7 +167,7 @@ export const Header: React.FC<HeaderProps> = ({
             <Search size={14} color="var(--text-dim)" style={{ position: 'absolute', left: '10px', top: '10px' }} />
             <input
               type="text"
-              placeholder="搜索邮件..."
+              placeholder={t('header.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               autoFocus
@@ -202,7 +207,7 @@ export const Header: React.FC<HeaderProps> = ({
         <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-main)' }}>
           {selectedDomain ? (
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ color: 'var(--text-dim)' }}>域名:</span>
+              <span style={{ color: 'var(--text-dim)' }}>{t('header.domainLabel')}</span>
               <span style={{ fontFamily: 'var(--font-mono)', color: '#818cf8' }}>{selectedDomain.domain}</span>
               {selectedAliasPrefix && (
                 <>
@@ -212,7 +217,7 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </span>
           ) : (
-            <span>全部聚合邮箱</span>
+            <span>{t('header.allMailboxes')}</span>
           )}
         </div>
 
@@ -229,7 +234,7 @@ export const Header: React.FC<HeaderProps> = ({
             color: '#c4b5fd'
           }}>
             <Sparkles size={12} className="animate-spin-slow" color="#c084fc" />
-            <span>Agent 正在分析邮件...</span>
+            <span>{t('header.agentAnalyzing')}</span>
           </div>
         )}
       </div>
@@ -247,7 +252,7 @@ export const Header: React.FC<HeaderProps> = ({
         <Search size={14} color="var(--text-dim)" style={{ position: 'absolute', left: '10px' }} />
         <input
           type="text"
-          placeholder="搜索主题、发件人或提取的验证码..."
+          placeholder={t('header.searchPlaceholder')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           style={{
@@ -264,11 +269,14 @@ export const Header: React.FC<HeaderProps> = ({
         />
       </div>
 
-      {/* 右侧控制栏：Token 统计与模拟新邮件 */}
+      {/* 右侧控制栏：语言切换、Token 统计与模拟新邮件 */}
       <div 
         className="app-region-no-drag"
-        style={{ display: 'flex', alignItems: 'center', gap: '12px' }}
+        style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
       >
+        {/* 语言切换按钮 */}
+        <LanguageToggle compact />
+
         {/* Token 消耗徽章 */}
         <div style={{
           display: 'flex',
@@ -280,7 +288,7 @@ export const Header: React.FC<HeaderProps> = ({
           padding: '4px 10px',
           fontSize: '11px',
           color: 'var(--text-muted)'
-        }} title="累计大模型 Token 消耗及推理成本">
+        }} title={t('agent.totalTokens')}>
           <Coins size={13} color="#f59e0b" />
           <span style={{ fontFamily: 'var(--font-mono)' }}>{totalTokensConsumed.toLocaleString()} Tok</span>
           <span style={{ color: 'var(--text-dim)' }}>|</span>
@@ -304,10 +312,10 @@ export const Header: React.FC<HeaderProps> = ({
               fontSize: '12px',
               fontWeight: 600,
             }}
-            title="直连生产 Cloudflare Worker API 拉取最新真实域名邮件并由 DeepSeek-R1 研判"
+            title={t('header.syncTooltip')}
           >
             <Cloud size={13} className={isSyncingProduction ? "animate-spin-slow" : ""} />
-            <span>{isSyncingProduction ? '同步生产邮件中...' : '同步 Cloudflare'}</span>
+            <span>{isSyncingProduction ? t('header.syncing') : t('header.syncInbound')}</span>
           </button>
         )}
 
@@ -326,10 +334,10 @@ export const Header: React.FC<HeaderProps> = ({
             fontSize: '12px',
             fontWeight: 500,
           }}
-          title="生成一封模拟来信，即刻体验 Agent 自动分类与提取验证码/起草流水线"
+          title={t('header.simulateTooltip')}
         >
           <Plus size={13} />
-          <span>模拟来信</span>
+          <span>{t('header.simulateMail')}</span>
         </button>
 
         {/* 刷新同步 */}
@@ -343,7 +351,7 @@ export const Header: React.FC<HeaderProps> = ({
             alignItems: 'center',
             justifyContent: 'center'
           }}
-          title="拉取最新邮件"
+          title={t('header.refreshTooltip')}
         >
           <RotateCw size={15} />
         </button>

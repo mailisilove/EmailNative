@@ -7,10 +7,10 @@ import {
   Receipt, 
   Briefcase, 
   AlertTriangle,
-  MailCheck,
-  Tag
+  MailCheck
 } from 'lucide-react';
 import { EmailCategory, EmailMessage } from '../../core/types';
+import { useI18n } from '../../core/i18n/I18nContext';
 
 interface EmailListProps {
   emails: EmailMessage[];
@@ -28,21 +28,24 @@ export const EmailList: React.FC<EmailListProps> = ({
   onSelectEmail,
   onToggleStar,
   onRunAgentForEmail,
-  currentInboxTitle = '所有域名聚合收件箱',
+  currentInboxTitle,
   isMobile = false,
 }) => {
+  const { t } = useI18n();
+  const inboxTitle = currentInboxTitle || t('sidebar.allInboxes');
+
   const getCategoryBadge = (category?: EmailCategory) => {
     switch (category) {
       case 'verification':
-        return { label: '验证码', bg: 'rgba(99, 102, 241, 0.18)', text: '#a5b4fc', border: 'rgba(99, 102, 241, 0.3)', icon: ShieldCheck };
+        return { label: t('emailList.verification'), bg: 'rgba(99, 102, 241, 0.18)', text: '#a5b4fc', border: 'rgba(99, 102, 241, 0.3)', icon: ShieldCheck };
       case 'transactional':
-        return { label: '账单', bg: 'rgba(16, 185, 129, 0.15)', text: '#6ee7b7', border: 'rgba(16, 185, 129, 0.3)', icon: Receipt };
+        return { label: t('emailList.transactional'), bg: 'rgba(16, 185, 129, 0.15)', text: '#6ee7b7', border: 'rgba(16, 185, 129, 0.3)', icon: Receipt };
       case 'business':
-        return { label: '重要', bg: 'rgba(139, 92, 246, 0.18)', text: '#c4b5fd', border: 'rgba(139, 92, 246, 0.35)', icon: Briefcase };
+        return { label: t('emailList.business'), bg: 'rgba(139, 92, 246, 0.18)', text: '#c4b5fd', border: 'rgba(139, 92, 246, 0.35)', icon: Briefcase };
       case 'spam':
-        return { label: '垃圾', bg: 'rgba(244, 63, 94, 0.15)', text: '#fda4af', border: 'rgba(244, 63, 94, 0.3)', icon: AlertTriangle };
+        return { label: t('emailList.spam'), bg: 'rgba(244, 63, 94, 0.15)', text: '#fda4af', border: 'rgba(244, 63, 94, 0.3)', icon: AlertTriangle };
       default:
-        return null; // 通用邮件无需添加多余标签干扰视觉
+        return null;
     }
   };
 
@@ -68,7 +71,8 @@ export const EmailList: React.FC<EmailListProps> = ({
         padding: '40px'
       }}>
         <MailCheck size={40} strokeWidth={1.2} style={{ marginBottom: '12px', opacity: 0.4 }} />
-        <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-dim)' }}>暂无邮件</div>
+        <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-dim)' }}>{t('emailList.noEmails')}</div>
+        <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px', opacity: 0.7 }}>{t('emailList.noEmailsDesc')}</div>
       </div>
     );
   }
@@ -102,9 +106,9 @@ export const EmailList: React.FC<EmailListProps> = ({
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: 'var(--text-muted)' }}>
             <span style={{ color: '#818cf8' }}>●</span>
-            <span>{currentInboxTitle}</span>
+            <span>{inboxTitle}</span>
           </div>
-          <span style={{ fontFamily: 'var(--font-mono)' }}>{emails.length} 封</span>
+          <span style={{ fontFamily: 'var(--font-mono)' }}>{emails.length} {t('emailList.itemsCount')}</span>
         </div>
       )}
 
@@ -263,7 +267,7 @@ export const EmailList: React.FC<EmailListProps> = ({
                     color: '#c4b5fd',
                     background: 'rgba(139, 92, 246, 0.15)',
                   }}
-                  title="Agent 分析"
+                  title={t('emailList.runAgent')}
                 >
                   <Sparkles size={11} />
                 </button>

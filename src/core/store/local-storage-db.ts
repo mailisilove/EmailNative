@@ -23,6 +23,7 @@ const STORAGE_KEYS = {
   LLM_CONFIG: 'emailnative_llm_config_v1',
   CF_CONFIG: 'emailnative_cf_config_v1',
   OUTBOUND_CONFIG: 'emailnative_outbound_config_v1',
+  LANGUAGE: 'emailnative_lang_v1',
 };
 
 export class LocalStorageDB {
@@ -222,5 +223,27 @@ export class LocalStorageDB {
 
   static saveOutboundConfig(config: OutboundMailConfig): void {
     this.save(STORAGE_KEYS.OUTBOUND_CONFIG, config);
+  }
+
+  // ----------------- 界面语言 -----------------
+  static getLanguage(): 'zh' | 'en' {
+    if (typeof window === 'undefined') return 'zh';
+    try {
+      const stored = localStorage.getItem(STORAGE_KEYS.LANGUAGE);
+      if (stored === 'zh' || stored === 'en') return stored;
+      return navigator.language.startsWith('zh') ? 'zh' : 'en';
+    } catch {
+      return 'zh';
+    }
+  }
+
+  static saveLanguage(lang: 'zh' | 'en'): void {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem(STORAGE_KEYS.LANGUAGE, lang);
+      }
+    } catch (err) {
+      console.error('Save language failed', err);
+    }
   }
 }

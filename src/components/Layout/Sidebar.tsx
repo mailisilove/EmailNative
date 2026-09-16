@@ -4,15 +4,11 @@ import {
   Sparkles, 
   Globe, 
   Settings, 
-  ShieldCheck, 
   PlusCircle, 
-  Tag, 
-  Zap,
-  Mail,
-  ChevronRight,
-  BarChart3
+  Mail
 } from 'lucide-react';
 import { ManagedDomain } from '../../core/types';
+import { useI18n } from '../../core/i18n/I18nContext';
 
 interface SidebarProps {
   currentView: 'inbox' | 'domains' | 'agent' | 'analytics';
@@ -43,6 +39,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenSettings,
   onNewEmail,
 }) => {
+  const { t } = useI18n();
   return (
     <aside style={{
       width: '270px',
@@ -101,7 +98,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               }}>AGENT</span>
             </div>
             <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
-              域名邮箱智能桌面端
+              {t('sidebar.brandSubtitle')}
             </div>
           </div>
         </div>
@@ -130,7 +127,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
         >
           <Mail size={15} />
-          撰写出站邮件
+          {t('sidebar.compose')}
         </button>
       </div>
 
@@ -138,7 +135,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div style={{ flex: 1, overflowY: 'auto', padding: '10px 12px' }}>
         {/* 主要工作区 */}
         <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-dim)', padding: '6px 8px', letterSpacing: '0.05em' }}>
-          工作台
+          {t('sidebar.workspace')}
         </div>
 
         <button
@@ -163,7 +160,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
             <Inbox size={16} color={currentView === 'inbox' && !selectedDomainId ? '#818cf8' : 'currentColor'} />
-            <span>所有域名聚合收件箱</span>
+            <span>{t('sidebar.allInboxes')}</span>
           </div>
           {unreadCount > 0 && (
             <span style={{
@@ -197,7 +194,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
             <Sparkles size={16} color="#c084fc" />
-            <span>Agent 自动化流</span>
+            <span>{t('sidebar.agentFlow')}</span>
           </div>
           <span style={{
             fontSize: '10px',
@@ -213,7 +210,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               background: '#34d399',
               boxShadow: '0 0 6px #34d399'
             }} />
-            4 Active
+            {t('sidebar.activeCount')}
           </span>
         </button>
 
@@ -235,7 +232,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
             <Globe size={16} color="#38bdf8" />
-            <span>域名与别名管理</span>
+            <span>{t('sidebar.domainManage')}</span>
           </div>
           <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
             {domains.length}
@@ -258,12 +255,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
             padding: '4px 8px 8px',
             letterSpacing: '0.05em'
           }}>
-            <span>我的域名</span>
+            <span>{t('sidebar.managedDomains')}</span>
             <button
               onClick={() => setCurrentView('domains')}
               style={{ color: 'var(--accent-primary)', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '2px' }}
             >
-              <PlusCircle size={12} /> 添加
+              <PlusCircle size={12} /> {t('common.edit')}
             </button>
           </div>
 
@@ -410,7 +407,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             boxShadow: '0 0 8px #10b981'
           }} />
           <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-            Agent 守候中
+            {t('sidebar.agentStandingBy')}
           </div>
         </div>
 
@@ -426,7 +423,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           }}
           onMouseEnter={(e) => (e.currentTarget.style.color = '#fff')}
           onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
-          title="系统配置与 API Keys"
+          title={t('sidebar.settings')}
         >
           <Settings size={16} />
         </button>

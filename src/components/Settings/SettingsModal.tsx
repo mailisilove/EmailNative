@@ -7,17 +7,19 @@ import {
   Copy, 
   Check, 
   ShieldCheck, 
-  ExternalLink,
-  Code,
-  Sparkles,
-  Mail,
-  Lock,
-  Database,
-  RefreshCw
+  Code, 
+  Sparkles, 
+  Mail, 
+  Lock, 
+  Database, 
+  RefreshCw, 
+  Globe 
 } from 'lucide-react';
 import { CloudflareConfig, LLMConfig, OutboundMailConfig } from '../../core/types';
 import { CloudflareWorkerClient } from '../../core/email-gateway/cf-worker-client';
 import { DnsInspectorModal } from '../Domains/DnsInspectorModal';
+import { useI18n } from '../../core/i18n/I18nContext';
+import { LanguageToggle } from '../Common/LanguageToggle';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -40,7 +42,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   outboundConfig,
   onSaveOutboundConfig,
 }) => {
-  const [activeTab, setActiveTab] = useState<'llm' | 'cloudflare' | 'outbound' | 'worker_code'>('llm');
+  const { t, language, setLanguage } = useI18n();
+  const [activeTab, setActiveTab] = useState<'general' | 'llm' | 'cloudflare' | 'outbound' | 'worker_code'>('general');
 
   // 本地表单状态
   const [llm, setLlm] = useState<LLMConfig>({ ...llmConfig });
@@ -209,11 +212,14 @@ export default {
           background: 'rgba(255, 255, 255, 0.02)'
         }}>
           <div style={{ fontSize: '16px', fontWeight: 700, color: '#fff' }}>
-            系统凭证与运行配置
+            {t('settings.modalTitle')}
           </div>
-          <button onClick={onClose} style={{ color: 'var(--text-dim)' }}>
-            <X size={18} />
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <LanguageToggle compact />
+            <button onClick={onClose} style={{ color: 'var(--text-dim)' }}>
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         {/* 选项卡导航 */}
@@ -224,10 +230,11 @@ export default {
           background: 'rgba(0, 0, 0, 0.2)'
         }}>
           {[
-            { id: 'llm', label: 'AI 模型推理', icon: Key },
-            { id: 'cloudflare', label: 'Cloudflare 邮件网关', icon: Cloud },
-            { id: 'outbound', label: '出站发信渠道', icon: Send },
-            { id: 'worker_code', label: 'Worker 部署源码', icon: Code },
+            { id: 'general', label: t('settings.tabGeneral'), icon: Globe },
+            { id: 'llm', label: t('settings.tabLlm'), icon: Key },
+            { id: 'cloudflare', label: t('settings.tabCloudflare'), icon: Cloud },
+            { id: 'outbound', label: t('settings.tabOutbound'), icon: Send },
+            { id: 'worker_code', label: t('settings.tabWorkerCode'), icon: Code },
           ].map(tab => {
             const Icon = tab.icon;
             const isCurrent = activeTab === tab.id;
@@ -270,10 +277,107 @@ export default {
           }}>
             <Lock size={15} style={{ color: '#34d399', flexShrink: 0 }} />
             <div>
-              <strong>纯客户端零中转安全保障 (Zero-Server Relay)</strong>：
-              所有 API 密钥（Resend / Cloudflare / DeepSeek）均保存在您本地设备（浏览器 LocalStorage / Electron 原生持久化），代码完全开源，零服务端中转，彻底消除密钥泄露顾虑。
+              <strong>{t('settings.zeroRelayTitle')}</strong>：
+              {t('settings.zeroRelayDesc')}
             </div>
           </div>
+
+          {/* TAB 0: GENERAL & LANGUAGE */}
+          {activeTab === 'general' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div>
+                <label style={{ fontSize: '13px', color: '#fff', fontWeight: 600, display: 'block', marginBottom: '6px' }}>
+                  {t('settings.langSelectTitle')}
+                </label>
+                <p style={{ fontSize: '12px', color: 'var(--text-dim)', marginBottom: '14px', lineHeight: 1.5 }}>
+                  {t('settings.langSelectDesc')}
+                </p>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  {/* 中文选项卡 */}
+                  <button
+                    type="button"
+                    onClick={() => setLanguage('zh')}
+                    style={{
+                      padding: '16px',
+                      borderRadius: '10px',
+                      border: language === 'zh' ? '2px solid #818cf8' : '1px solid var(--border-subtle)',
+                      background: language === 'zh' ? 'rgba(99, 102, 241, 0.12)' : 'rgba(255, 255, 255, 0.02)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: 600, color: language === 'zh' ? '#fff' : 'var(--text-muted)' }}>
+                        简体中文
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '2px' }}>
+                        Chinese (Simplified)
+                      </div>
+                    </div>
+                    {language === 'zh' && (
+                      <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Check size={12} color="#fff" />
+                      </div>
+                    )}
+                  </button>
+
+                  {/* English 选项卡 */}
+                  <button
+                    type="button"
+                    onClick={() => setLanguage('en')}
+                    style={{
+                      padding: '16px',
+                      borderRadius: '10px',
+                      border: language === 'en' ? '2px solid #818cf8' : '1px solid var(--border-subtle)',
+                      background: language === 'en' ? 'rgba(99, 102, 241, 0.12)' : 'rgba(255, 255, 255, 0.02)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: 600, color: language === 'en' ? '#fff' : 'var(--text-muted)' }}>
+                        English
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '2px' }}>
+                        English (US)
+                      </div>
+                    </div>
+                    {language === 'en' && (
+                      <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Check size={12} color="#fff" />
+                      </div>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* 协议与开源信息 */}
+              <div style={{
+                marginTop: '10px',
+                padding: '14px 16px',
+                background: 'rgba(0, 0, 0, 0.25)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: '10px',
+              }}>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: '#fff', marginBottom: '6px' }}>
+                  EmailNative Open Source Edition (v0.1.0)
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--text-dim)', lineHeight: 1.6 }}>
+                  MIT License · Free & Open-Source Community Edition.<br />
+                  GitHub: <a href="https://github.com/mailisilove/EmailNative" target="_blank" rel="noreferrer" style={{ color: '#818cf8' }}>github.com/mailisilove/EmailNative</a>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* TAB 1: LLM */}
           {activeTab === 'llm' && (
@@ -801,7 +905,7 @@ export default {
                   }}
                 >
                   {copiedCode ? <Check size={13} /> : <Copy size={13} />}
-                  <span>{copiedCode ? '已复制代码' : '复制代码'}</span>
+                  <span>{copiedCode ? t('settings.copiedCode') : t('settings.copyCode')}</span>
                 </button>
               </div>
               <pre style={{
@@ -835,7 +939,7 @@ export default {
             onClick={onClose}
             style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '13px', color: 'var(--text-muted)' }}
           >
-            取消
+            {t('common.cancel')}
           </button>
           <button
             onClick={handleSaveAll}
@@ -853,7 +957,7 @@ export default {
             }}
           >
             {savedSuccess ? <Check size={14} /> : null}
-            <span>{savedSuccess ? '配置已保存' : '保存设置'}</span>
+            <span>{savedSuccess ? t('common.saved') : t('settings.saveAll')}</span>
           </button>
         </div>
       </div>

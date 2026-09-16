@@ -1,5 +1,6 @@
 import React from 'react';
 import { Inbox, Sparkles, Globe, Settings } from 'lucide-react';
+import { useI18n } from '../../core/i18n/I18nContext';
 
 interface MobileTabBarProps {
   currentTab: 'inbox' | 'domains' | 'agent' | 'settings';
@@ -12,11 +13,12 @@ export const MobileTabBar: React.FC<MobileTabBarProps> = ({
   onTabChange,
   unreadCount,
 }) => {
+  const { t } = useI18n();
   const tabs = [
-    { id: 'inbox' as const, label: '收件箱', icon: Inbox, badge: unreadCount },
-    { id: 'agent' as const, label: 'Agent', icon: Sparkles },
-    { id: 'domains' as const, label: '多域名', icon: Globe },
-    { id: 'settings' as const, label: '设置', icon: Settings },
+    { id: 'inbox' as const, label: t('mobile.inbox'), icon: Inbox, badge: unreadCount },
+    { id: 'agent' as const, label: t('mobile.agent'), icon: Sparkles },
+    { id: 'domains' as const, label: t('mobile.domains'), icon: Globe },
+    { id: 'settings' as const, label: t('mobile.settings'), icon: Settings },
   ];
 
   return (

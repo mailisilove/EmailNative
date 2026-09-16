@@ -3,28 +3,23 @@ import {
   Globe, 
   Plus, 
   CheckCircle2, 
-  AlertCircle, 
   Tag, 
-  Sparkles, 
   Copy, 
   Check, 
-  ShieldCheck,
-  Server,
-  Zap,
-  ArrowRight,
-  Trash2,
-  Edit2,
-  Power,
-  AlertTriangle,
-  Mail,
-  Sliders,
-  CheckCircle,
-  ChevronLeft,
-  ChevronRight
+  ShieldCheck, 
+  Server, 
+  Trash2, 
+  Edit2, 
+  Power, 
+  AlertTriangle, 
+  Mail, 
+  ChevronLeft, 
+  ChevronRight 
 } from 'lucide-react';
 import { ManagedDomain, AutomationLevel, TraditionalIMAPConfig, DomainProtocolType, DomainAlias } from '../../core/types';
 import { TRADITIONAL_MAILBOX_PRESETS } from '../../core/email-gateway/imap-adapter';
 import { DnsInspectorModal } from './DnsInspectorModal';
+import { useI18n } from '../../core/i18n/I18nContext';
 
 interface DomainManagerProps {
   domains: ManagedDomain[];
@@ -55,6 +50,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
   onChangeDomainAutomationLevel,
   isMobile = false,
 }) => {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState<'cloudflare' | 'traditional'>('cloudflare');
   const [selectedDomainId, setSelectedDomainId] = useState<string>(domains[0]?.id || '');
   const [mobileActiveDomainId, setMobileActiveDomainId] = useState<string | null>(null);
@@ -246,10 +242,10 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
           gap: '10px'
         }}>
           <Globe size={24} color="#38bdf8" />
-          <span>域名邮箱综合管理 (Cloudflare + 传统企业邮)</span>
+          <span>{t('domains.title')}</span>
         </h1>
         <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px' }}>
-          统一管理所有自定义域名与收发邮箱，支持独立停用、启用、编辑与安全删除。
+          {t('domains.subtitle')}
         </p>
       </div>
 
@@ -274,7 +270,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                 <Mail size={16} color="#38bdf8" />
                 <span style={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>
-                  集中归集主邮箱 (Central Master Forwarding)
+                  {t('domains.masterForwardEmail')}
                 </span>
                 <span style={{
                   fontSize: '10.5px',
@@ -285,11 +281,11 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                   border: '1px solid rgba(16, 185, 129, 0.3)',
                   fontWeight: 600
                 }}>
-                  永久默认接收
+                  {t('common.active')}
                 </span>
               </div>
               <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0, lineHeight: 1.4 }}>
-                填入此邮箱后，所有绑定的多域名来信将自动静默双重备份至此地址；客户端内按域名独立智能分流。
+                {t('domains.masterForwardEmailDesc')}
               </p>
             </div>
 
@@ -304,7 +300,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
             >
               <input
                 type="email"
-                placeholder="例如: backup@yourdomain.com"
+                placeholder={t('domains.masterForwardPlaceholder')}
                 value={masterEmailInput}
                 onChange={(e) => setMasterEmailInput(e.target.value)}
                 style={{
@@ -336,7 +332,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                 }}
               >
                 {masterEmailSaved ? <Check size={14} /> : <CheckCircle2 size={14} />}
-                <span>{masterEmailSaved ? '永久默认已生效' : '设为默认接收'}</span>
+                <span>{masterEmailSaved ? t('common.saved') : t('domains.saveMasterEmail')}</span>
               </button>
             </form>
           </div>

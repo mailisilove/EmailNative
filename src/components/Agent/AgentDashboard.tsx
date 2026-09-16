@@ -4,16 +4,13 @@ import {
   ShieldCheck, 
   BrainCircuit, 
   Send, 
-  CheckCircle2, 
-  Clock, 
   Coins, 
-  Flame, 
   Zap,
-  ArrowRight,
   Activity
 } from 'lucide-react';
 import { AgentPipelineRun, LLMConfig } from '../../core/types';
 import { Settings, Sliders, Cpu, CheckCircle } from 'lucide-react';
+import { useI18n } from '../../core/i18n/I18nContext';
 
 interface AgentDashboardProps {
   runs: AgentPipelineRun[];
@@ -34,6 +31,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
   onOpenSettings,
   isMobile = false,
 }) => {
+  const { t } = useI18n();
   return (
     <div style={{
       flex: 1,
@@ -55,10 +53,10 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
             gap: '8px'
           }}>
             <Sparkles size={isMobile ? 20 : 24} color="#a855f7" />
-            <span>Agent 调度中心</span>
+            <span>{t('agent.dashboardTitle')}</span>
           </h1>
           <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
-            实时监控邮件研判、消耗花费与自动化设置
+            {t('agent.dashboardSubtitle')}
           </p>
         </div>
 
@@ -79,7 +77,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
             }}
           >
             <Settings size={14} />
-            <span>{isMobile ? '设置' : '调用设置'}</span>
+            <span>{t('agent.settingsBtn')}</span>
           </button>
         )}
       </div>
@@ -105,7 +103,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
             <Coins size={19} color="#f59e0b" />
           </div>
           <div>
-            <div style={{ fontSize: '11px', color: 'var(--text-dim)', fontWeight: 600 }}>推理花费 (USD)</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-dim)', fontWeight: 600 }}>{t('agent.totalCost')} (USD)</div>
             <div style={{ fontSize: isMobile ? '17px' : '20px', fontWeight: 700, color: '#10b981', fontFamily: 'var(--font-mono)' }}>
               ${totalCost.toFixed(5)}
             </div>
@@ -126,9 +124,9 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
             <Activity size={19} color="#34d399" />
           </div>
           <div>
-            <div style={{ fontSize: '11px', color: 'var(--text-dim)', fontWeight: 600 }}>研判任务总数</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-dim)', fontWeight: 600 }}>{t('agent.totalRuns')}</div>
             <div style={{ fontSize: isMobile ? '17px' : '20px', fontWeight: 700, color: '#fff', fontFamily: 'var(--font-mono)' }}>
-              {runs.length} <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>次任务</span>
+              {runs.length}
             </div>
           </div>
         </div>
@@ -148,7 +146,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
             <Zap size={19} color="#818cf8" />
           </div>
           <div>
-            <div style={{ fontSize: '11px', color: 'var(--text-dim)', fontWeight: 600 }}>消耗 Token 规模</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-dim)', fontWeight: 600 }}>{t('agent.totalTokens')}</div>
             <div style={{ fontSize: isMobile ? '17px' : '20px', fontWeight: 700, color: '#fff', fontFamily: 'var(--font-mono)' }}>
               {totalTokens.toLocaleString()} <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>Tokens</span>
             </div>

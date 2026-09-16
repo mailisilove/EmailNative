@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  ShieldCheck, 
   AlertTriangle, 
   XCircle, 
   CheckCircle2, 
@@ -12,6 +11,7 @@ import {
   X 
 } from 'lucide-react';
 import { DnsInspector, DomainHealthReport } from '../../core/email-gateway/dns-inspector';
+import { useI18n } from '../../core/i18n/I18nContext';
 
 interface DnsInspectorModalProps {
   domain: string;
@@ -26,6 +26,7 @@ export const DnsInspectorModal: React.FC<DnsInspectorModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const { t } = useI18n();
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState<DomainHealthReport | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -101,14 +102,14 @@ export const DnsInspectorModal: React.FC<DnsInspectorModalProps> = ({
                 fontWeight: 700,
                 letterSpacing: '0.5px'
               }}>
-                DNS & 送达率深度体检
+                {t('dnsInspector.title')}
               </span>
               <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#fff', margin: 0 }}>
                 {domain}
               </h2>
             </div>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
-              自动诊断 Cloudflare Email Routing 入站、Resend 发信认证 (SPF / DKIM / DMARC)
+              {t('dnsInspector.subtitle')}
             </p>
           </div>
 
@@ -131,7 +132,7 @@ export const DnsInspectorModal: React.FC<DnsInspectorModalProps> = ({
               }}
             >
               <RefreshCw size={14} className={loading ? 'spin' : ''} />
-              <span>{loading ? '正在诊断...' : '重新检测'}</span>
+              <span>{loading ? t('dnsInspector.reinspecting') : t('dnsInspector.reinspect')}</span>
             </button>
             <button
               onClick={onClose}
@@ -175,8 +176,8 @@ export const DnsInspectorModal: React.FC<DnsInspectorModalProps> = ({
           }}>
             <Lock size={16} style={{ marginTop: '2px', flexShrink: 0, color: '#818cf8' }} />
             <div>
-              <strong>纯客户端零中转安全架构 (Zero-Server Relay)</strong>：
-              此项检测直接调用 Cloudflare 权威公共 DoH 节点在您的本地环境完成查询。所有 API Key 与配置仅存储在本地设备中，绝不上传至任何第三方中间服务器。
+              <strong>{t('settings.zeroRelayTitle')}</strong>：
+              {t('dnsInspector.zeroRelayNotice')}
             </div>
           </div>
 
@@ -194,14 +195,14 @@ export const DnsInspectorModal: React.FC<DnsInspectorModalProps> = ({
               border: report.score >= 80 ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(245, 158, 11, 0.3)',
             }}>
               <div>
-                <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>发信健康指数</div>
+                <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>{t('dnsInspector.healthScore')}</div>
                 <div style={{
                   fontSize: '28px',
                   fontWeight: 800,
                   color: report.score >= 80 ? '#34d399' : report.score >= 50 ? '#fbbf24' : '#f87171',
                   marginTop: '2px'
                 }}>
-                  {report.score} <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-dim)' }}>/ 100 分</span>
+                  {report.score} <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-dim)' }}>/ 100</span>
                 </div>
               </div>
 
@@ -215,10 +216,10 @@ export const DnsInspectorModal: React.FC<DnsInspectorModalProps> = ({
                   justifyContent: 'flex-end'
                 }}>
                   {report.allPassed ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
-                  <span>{report.allPassed ? '所有收发信安全配置均已达标' : '部分记录需补充或优化'}</span>
+                  <span>{report.allPassed ? t('dnsInspector.scoreExcellent') : t('dnsInspector.scoreIssues')}</span>
                 </div>
                 <div style={{ color: 'var(--text-dim)', marginTop: '4px' }}>
-                  检测时间：{new Date(report.timestamp).toLocaleTimeString()}
+                  {new Date(report.timestamp).toLocaleTimeString()}
                 </div>
               </div>
             </div>
