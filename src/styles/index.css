@@ -252,6 +252,13 @@ input, textarea, select {
   color: #111827 !important;
 }
 
+[data-theme="light"] [style*="color: #cbd5e1"],
+[data-theme="light"] [style*="color: #e2e8f0"],
+[data-theme="light"] [style*="color: #f8fafc"],
+[data-theme="light"] [style*="color: #f1f5f9"] {
+  color: #000000 !important;
+}
+
 [data-theme="light"] [style*="color: #64748b"],
 [data-theme="light"] [style*="color: var(--text-dim)"] {
   color: #374151 !important;

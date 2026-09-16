@@ -357,18 +357,18 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
         {/* AI 提炼看板：纯净无噪音 */}
         {insight && (
           <div style={{
-            background: 'rgba(18, 26, 48, 0.5)',
+            background: 'var(--bg-card)',
             border: '1px solid var(--border-subtle)',
             borderRadius: '10px',
             padding: '12px 16px',
             marginBottom: '18px'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 600, color: '#c4b5fd', marginBottom: '8px' }}>
-              <Sparkles size={12} color="#a78bfa" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 600, color: 'var(--accent-primary)', marginBottom: '8px' }}>
+              <Sparkles size={12} color="var(--accent-primary)" />
               <span>AI 提炼</span>
             </div>
 
-            <div style={{ fontSize: '13px', color: '#e2e8f0', lineHeight: 1.5 }}>
+            <div style={{ fontSize: '13px', color: 'var(--text-main)', lineHeight: 1.6 }}>
               {insight.summary}
             </div>
 
@@ -379,7 +379,7 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
                   <div
                     key={item.id}
                     style={{
-                      background: 'rgba(0, 0, 0, 0.25)',
+                      background: 'var(--bg-surface-hover)',
                       border: '1px solid var(--border-subtle)',
                       borderRadius: '6px',
                       padding: '5px 10px',
@@ -387,7 +387,7 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
                       alignItems: 'center',
                       gap: '6px',
                       fontSize: '11px',
-                      color: '#f8fafc'
+                      color: 'var(--text-main)'
                     }}
                   >
                     {item.type === 'payment' && <CreditCard size={12} color="#10b981" />}
@@ -405,9 +405,9 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
         <div style={{
           fontSize: '14px',
           lineHeight: 1.7,
-          color: '#cbd5e1',
+          color: 'var(--text-main)',
           whiteSpace: 'pre-wrap',
-          background: 'rgba(0, 0, 0, 0.15)',
+          background: 'var(--bg-surface)',
           padding: '20px',
           borderRadius: '8px',
           border: '1px solid var(--border-subtle)',
@@ -492,9 +492,9 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
                   width: '100%',
                   padding: '10px',
                   borderRadius: '8px',
-                  background: 'rgba(0, 0, 0, 0.35)',
+                  background: 'var(--bg-surface)',
                   border: '1px solid rgba(99, 102, 241, 0.35)',
-                  color: '#fff',
+                  color: 'var(--text-main)',
                   fontSize: '13px',
                   lineHeight: 1.5,
                   marginBottom: '10px'
@@ -502,13 +502,13 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
               />
             ) : (
               <div style={{
-                background: 'rgba(0, 0, 0, 0.2)',
+                background: 'var(--bg-surface)',
                 padding: '10px 12px',
                 borderRadius: '8px',
                 border: '1px solid var(--border-subtle)',
                 fontSize: '13px',
                 lineHeight: 1.5,
-                color: '#e2e8f0',
+                color: 'var(--text-main)',
                 whiteSpace: 'pre-wrap',
                 marginBottom: '10px'
               }}>
