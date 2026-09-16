@@ -1,0 +1,22 @@
+name = "emailnative-mail-gateway"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+# 绑定 Cloudflare D1 数据库 (执行 npx wrangler d1 create emailnative-db 后将返回的 database_id 填入此处)
+[[d1_databases]]
+binding = "DB"
+database_name = "emailnative-db"
+database_id = "YOUR_D1_DATABASE_ID_HERE" # 部署前替换为您创建的 D1 数据库 ID
+
+# 环境变量配置
+[vars]
+# 访问该 Worker API 的鉴权密钥 (请修改为您自设的复杂秘钥，并与 EmailNative 客户端「设置」中的 ADMIN_TOKEN 保持一致)
+ADMIN_TOKEN = "emailnative_sec_token_change_me"
+
+# 可选集中归集主邮箱：若配置，所有多域名来信入库的同时静默抄送一份至此（需已在 Cloudflare Email Routing 中完成 Destination 验证）
+# 若不需要可留空 ""
+FORWARD_TO_GMAIL = ""
+
+# 可选 Webhook URL：若配置，Worker 收到邮件后将通过 POST 自动推送事件
+# WEBHOOK_URL = "https://your-webhook-endpoint.com/api/inbound"
+

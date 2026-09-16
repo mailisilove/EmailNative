@@ -1,0 +1,11 @@
+{
+  "appId": "com.emailnative.app",
+  "appName": "EmailNative",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "ios": {
+    "contentInset": "always"
+  }
+}
