@@ -136,7 +136,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
     setTradTesting(true);
     await new Promise(r => setTimeout(r, 600));
     setTradTesting(false);
-    setTradTestSuccess(`验证成功！已接入 ${tradHost}:${tradPort}`);
+    setTradTestSuccess(t('domains.tradConnected').replace('{host}', tradHost).replace('{port}', String(tradPort)));
 
     onAddDomain(tradDomain.trim(), 'traditional_imap', {
       imapHost: tradHost,
@@ -184,10 +184,10 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
 
     if (aliasModalMode === 'create') {
       if (!aliasPrefix.trim()) return;
-      onAddAlias(selectedDomain.id, aliasPrefix.trim(), aliasDesc.trim() || '自定义别名');
+      onAddAlias(selectedDomain.id, aliasPrefix.trim(), aliasDesc.trim() || aliasPrefix.trim());
     } else if (aliasModalMode === 'edit' && editingAliasId) {
       onUpdateAlias(selectedDomain.id, editingAliasId, {
-        description: aliasDesc.trim() || '自定义别名',
+        description: aliasDesc.trim() || aliasPrefix.trim(),
         isActive: aliasIsActive,
         autoReplyEnabled: aliasAutoReply,
       });
@@ -365,7 +365,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
               }}
             >
               <Globe size={13} />
-              <span>Cloudflare 路由域名 (无限别名)</span>
+              <span>{t('domains.tabCloudflareDesc')}</span>
             </button>
 
             <button
@@ -383,7 +383,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
               }}
             >
               <Server size={13} />
-              <span>传统企业邮箱 (IMAP / SMTP 协议)</span>
+              <span>{t('domains.tabTraditionalDesc')}</span>
             </button>
           </div>
         </div>
@@ -392,7 +392,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
           <form onSubmit={handleCreateCfDomain} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <input
               type="text"
-              placeholder="输入你的新域名，如: mybrand.ai"
+              placeholder={t('domains.domainNamePlaceholder')}
               value={newDomainInput}
               onChange={(e) => setNewDomainInput(e.target.value)}
               style={{
@@ -420,7 +420,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                 flexShrink: 0
               }}
             >
-              <Plus size={14} /> 绑定 Cloudflare 域名
+              <Plus size={14} /> {t('domains.bindCfBtn')}
             </button>
           </form>
         ) : (
@@ -447,7 +447,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
 
               <input
                 type="text"
-                placeholder="域名 (如: company.com)"
+                placeholder={t('domains.tradDomainPlaceholder')}
                 value={tradDomain}
                 onChange={(e) => setTradDomain(e.target.value)}
                 style={{
@@ -462,7 +462,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
 
               <input
                 type="email"
-                placeholder="邮箱账号 (user@company.com)"
+                placeholder={t('domains.tradUserPlaceholder')}
                 value={tradUser}
                 onChange={(e) => setTradUser(e.target.value)}
                 style={{
@@ -477,7 +477,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
 
               <input
                 type="password"
-                placeholder="客户端授权码 / 密码"
+                placeholder={t('domains.tradPassPlaceholder')}
                 value={tradPass}
                 onChange={(e) => setTradPass(e.target.value)}
                 style={{
@@ -506,7 +506,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                   whiteSpace: 'nowrap'
                 }}
               >
-                {tradTesting ? '验证连接中...' : '测试并接入'}
+                {tradTesting ? t('domains.testingConnection') : t('domains.testAndConnect')}
               </button>
             </div>
 
@@ -537,7 +537,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
               fontWeight: 600,
             }}
           >
-            <ChevronLeft size={16} /> 返回域名列表
+            <ChevronLeft size={16} /> {t('domains.backToDomainList')}
           </button>
           <span style={{ fontSize: '14px', fontFamily: 'var(--font-mono)', color: '#818cf8', fontWeight: 700 }}>
             {selectedDomain.domain}
@@ -552,10 +552,10 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
         <div style={{ width: isMobile ? '100%' : '320px', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
             <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-dim)' }}>
-              已管理域名 ({domains.length})
+              {t('domains.managedDomainsHeader').replace('{count}', String(domains.length))}
             </span>
             <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
-              {isMobile ? '点击卡片打开管理新页' : '点击切换管理'}
+              {isMobile ? t('domains.mobileCardHint') : t('domains.desktopCardHint')}
             </span>
           </div>
 
@@ -569,7 +569,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                 color: 'var(--text-dim)',
                 fontSize: '12px'
               }}>
-                暂无托管域名，请先在上方添加绑定
+                {t('domains.noManagedDomains')}
               </div>
             ) : (
               domains.map(d => {
@@ -636,7 +636,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                           }}
                           onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
                           onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-dim)')}
-                          title="删除此域名"
+                          title={t('domains.deleteDomain')}
                         >
                           <Trash2 size={13} />
                         </button>
@@ -648,8 +648,8 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                     </div>
 
                     <div style={{ fontSize: '11px', color: 'var(--text-dim)', display: 'flex', justifyContent: 'space-between', marginTop: '6px' }}>
-                      <span>{d.aliases.length} 个邮箱地址</span>
-                      <span>收信 {d.totalReceived}</span>
+                      <span>{t('domains.associatedAliases').replace('{count}', String(d.aliases.length))}</span>
+                      <span>{t('domains.aliasCount').replace('{count}', String(d.totalReceived))}</span>
                     </div>
                   </div>
                 );
@@ -686,12 +686,12 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                       border: selectedDomain.status === 'paused' ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid rgba(16, 185, 129, 0.3)',
                       fontWeight: 600
                     }}>
-                      {selectedDomain.status === 'paused' ? '已暂停服务' : '正常运行中'}
+                      {selectedDomain.status === 'paused' ? t('domains.statusPaused') : t('domains.statusRunning')}
                     </span>
                   </div>
                   <p style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px' }}>
-                    协议: {selectedDomain.provider === 'cloudflare' ? 'Cloudflare Email Routing (全动态别名)' : '传统商业 IMAP/SMTP 托管'}
-                    {selectedDomain.traditionalConfig?.username ? ` · 主账号: ${selectedDomain.traditionalConfig.username}` : ''}
+                    {t('domains.protocol')} {selectedDomain.provider === 'cloudflare' ? t('domains.protocolCf') : t('domains.protocolTrad')}
+                    {selectedDomain.traditionalConfig?.username ? ` · ${selectedDomain.traditionalConfig.username}` : ''}
                   </p>
                   <div style={{
                     display: 'inline-flex',
@@ -706,7 +706,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                     color: '#38bdf8'
                   }}>
                     <ShieldCheck size={12} />
-                    <span>集中双重备份：{masterEmailInput ? `同步备份至 ${masterEmailInput}` : '未配置集中归集邮箱 (可选)'}</span>
+                    <span>{t('domains.dualBackupLabel')}{masterEmailInput ? `${masterEmailInput}` : t('domains.noBackupConfigured')}</span>
                   </div>
                 </div>
 
@@ -727,10 +727,10 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                       fontWeight: 600,
                       cursor: 'pointer',
                     }}
-                    title="自动检测 MX、SPF、DKIM、DMARC 解析与 Resend 发信状态"
+                    title={t('domains.dnsInspectorBtn')}
                   >
                     <ShieldCheck size={13} />
-                    <span>⚡ 一键 DNS & 发信体检</span>
+                    <span>{t('domains.dnsInspectBtn')}</span>
                   </button>
 
                   <button
@@ -749,7 +749,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                     }}
                   >
                     <Power size={13} />
-                    <span>{selectedDomain.status === 'paused' ? '恢复运行' : '暂停此域名'}</span>
+                    <span>{selectedDomain.status === 'paused' ? t('domains.resumeDomain') : t('domains.pauseDomain')}</span>
                   </button>
 
                   <button
@@ -768,7 +768,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                     }}
                   >
                     <Trash2 size={13} />
-                    <span>删除域名</span>
+                    <span>{t('domains.deleteDomain')}</span>
                   </button>
                 </div>
               </div>
@@ -783,16 +783,16 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                 justifyContent: 'space-between'
               }}>
                 <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                  DeepSeek 自动化策略：
+                  {t('domains.strategyLabel')}
                 </span>
 
                 <div style={{ display: 'flex', background: 'rgba(0, 0, 0, 0.3)', padding: '3px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
                   {(['conservative', 'balanced', 'autonomous'] as AutomationLevel[]).map(level => {
                     const isCurrent = selectedDomain.defaultAutomationLevel === level;
                     const labels: Record<AutomationLevel, string> = {
-                      conservative: '保守审核',
-                      balanced: '平衡模式',
-                      autonomous: '全自主回复'
+                      conservative: t('domains.stratConservative'),
+                      balanced: t('domains.stratBalanced'),
+                      autonomous: t('domains.stratAutonomous')
                     };
                     return (
                       <button
@@ -827,7 +827,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Tag size={16} color="#818cf8" />
                   <h3 style={{ fontSize: '15px', fontWeight: 600, color: '#fff' }}>
-                    关联邮箱与别名 ({selectedDomain.aliases.length})
+                    {t('domains.associatedAliases').replace('{count}', String(selectedDomain.aliases.length))}
                   </h3>
                 </div>
 
@@ -846,7 +846,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                     fontWeight: 600
                   }}
                 >
-                  <Plus size={13} /> 添加新邮箱 / 别名
+                  <Plus size={13} /> {t('domains.addNewAlias')}
                 </button>
               </div>
 
@@ -859,7 +859,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                   color: 'var(--text-dim)',
                   fontSize: '13px'
                 }}>
-                  该域名下暂无独立邮箱或别名，请点击右上角【添加新邮箱 / 别名】
+                  {t('domains.noAliasesYet')}
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -889,7 +889,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                             <button
                               onClick={() => handleCopy(al.fullAddress)}
                               style={{ color: 'var(--text-dim)', padding: '2px' }}
-                              title="复制邮箱地址"
+                              title={t('common.copy')}
                             >
                               {copiedText === al.fullAddress ? <Check size={13} color="#10b981" /> : <Copy size={13} />}
                             </button>
@@ -902,12 +902,12 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                               color: isActive ? '#34d399' : '#9ca3af',
                               fontWeight: 500
                             }}>
-                              {isActive ? '运行中' : '已停用'}
+                              {isActive ? t('common.active') : t('common.inactive')}
                             </span>
                           </div>
 
                           <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px' }}>
-                            {al.description || '无备注用途'} · 累计收信: {al.emailCount || 0}
+                            {al.description || t('common.none')} · {t('domains.aliasCount').replace('{count}', String(al.emailCount || 0))}
                           </div>
                         </div>
 
@@ -927,7 +927,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                               onChange={() => onToggleAliasAutoReply(selectedDomain.id, al.id)}
                               style={{ accentColor: 'var(--accent-primary)' }}
                             />
-                            <span>DeepSeek 自动拟复</span>
+                            <span>{t('domains.aliasAiReplyLabel')}</span>
                           </label>
 
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -943,9 +943,9 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                                 gap: '4px',
                                 fontSize: '11px',
                               }}
-                              title="修改用途备注"
+                              title={t('common.edit')}
                             >
-                              <Edit2 size={12} /> 编辑
+                              <Edit2 size={12} /> {t('common.edit')}
                             </button>
 
                             <button
@@ -960,9 +960,9 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                                 gap: '4px',
                                 fontSize: '11px',
                               }}
-                              title="删除此邮箱"
+                              title={t('common.delete')}
                             >
-                              <Trash2 size={12} /> 删除
+                              <Trash2 size={12} /> {t('common.delete')}
                             </button>
                           </div>
                         </div>
@@ -985,7 +985,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
             color: 'var(--text-dim)',
             fontSize: '13px'
           }}>
-            请选择左侧域名或新建域名开始管理
+            {t('domains.emptyDomains')}
           </div>
         )
       )}
@@ -1015,18 +1015,18 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
             }}
           >
             <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#fff', marginBottom: '16px' }}>
-              {aliasModalMode === 'create' ? '创建新邮箱地址 / 别名' : `编辑邮箱: ${aliasPrefix}@${selectedDomain.domain}`}
+              {aliasModalMode === 'create' ? t('domains.aliasModalCreateTitle') : t('domains.aliasModalEditTitle').replace('{email}', `${aliasPrefix}@${selectedDomain.domain}`)}
             </h3>
 
             {aliasModalMode === 'create' && (
               <div style={{ marginBottom: '14px' }}>
                 <label style={{ fontSize: '12px', color: 'var(--text-dim)', display: 'block', marginBottom: '6px' }}>
-                  邮箱前缀
+                  {t('domains.aliasPrefixLabel')}
                 </label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <input
                     type="text"
-                    placeholder="例如: billing, security, support"
+                    placeholder={t('domains.aliasPrefixPlaceholder')}
                     value={aliasPrefix}
                     onChange={(e) => setAliasPrefix(e.target.value)}
                     style={{
@@ -1050,11 +1050,11 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
 
             <div style={{ marginBottom: '16px' }}>
               <label style={{ fontSize: '12px', color: 'var(--text-dim)', display: 'block', marginBottom: '6px' }}>
-                用途描述与备注
+                {t('domains.aliasDescLabel')}
               </label>
               <input
                 type="text"
-                placeholder="例如: 财务对账、外部业务合作对接"
+                placeholder={t('domains.aliasDescPlaceholder')}
                 value={aliasDesc}
                 onChange={(e) => setAliasDesc(e.target.value)}
                 style={{
@@ -1078,7 +1078,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                     onChange={(e) => setAliasIsActive(e.target.checked)}
                     style={{ accentColor: 'var(--accent-primary)' }}
                   />
-                  <span>启用此邮箱地址 (若取消勾选则暂停处理)</span>
+                  <span>{t('domains.aliasActiveLabel')}</span>
                 </label>
 
                 <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#fff', cursor: 'pointer' }}>
@@ -1088,7 +1088,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                     onChange={(e) => setAliasAutoReply(e.target.checked)}
                     style={{ accentColor: 'var(--accent-primary)' }}
                   />
-                  <span>允许 DeepSeek 针对此地址进信自动拟写回复</span>
+                  <span>{t('domains.aliasAiReplyDesc')}</span>
                 </label>
               </div>
             )}
@@ -1099,7 +1099,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                 onClick={() => setShowAliasModal(false)}
                 style={{ padding: '8px 14px', borderRadius: '6px', color: 'var(--text-muted)', fontSize: '13px' }}
               >
-                取消
+                {t('common.cancel')}
               </button>
               <button
                 type="submit"
@@ -1112,7 +1112,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                   fontWeight: 600
                 }}
               >
-                {aliasModalMode === 'create' ? '立即创建' : '保存修改'}
+                {aliasModalMode === 'create' ? t('domains.aliasCreateBtn') : t('domains.saveAliasBtn')}
               </button>
             </div>
           </form>
@@ -1142,14 +1142,12 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#f87171', marginBottom: '14px' }}>
               <AlertTriangle size={22} />
               <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#fff' }}>
-                确认删除此邮箱？
+                {t('domains.deleteAliasConfirmTitle')}
               </h3>
             </div>
 
             <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: '1.5', marginBottom: '16px' }}>
-              确定要删除邮箱地址 <strong style={{ color: '#fff', fontFamily: 'var(--font-mono)' }}>{deleteAliasTarget.alias.fullAddress}</strong> 吗？
-              <br />
-              删除后桌面客户端将停止对该别名或账号的监控与自动拟复。
+              {t('domains.deleteAliasConfirmText').replace('{address}', deleteAliasTarget.alias.fullAddress)}
             </p>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
@@ -1162,7 +1160,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                   fontSize: '13px'
                 }}
               >
-                取消
+                {t('common.cancel')}
               </button>
               <button
                 onClick={handleConfirmDeleteAlias}
@@ -1178,7 +1176,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                   gap: '6px'
                 }}
               >
-                <Trash2 size={14} /> 确认删除
+                <Trash2 size={14} /> {t('common.delete')}
               </button>
             </div>
           </div>
@@ -1208,13 +1206,12 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#f87171', marginBottom: '14px' }}>
               <AlertTriangle size={24} />
               <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#fff' }}>
-                确认删除整个域名配置？
+                {t('domains.deleteDomainConfirmTitle')}
               </h3>
             </div>
 
             <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: '1.5', marginBottom: '16px' }}>
-              确定要移除域名 <strong style={{ color: '#fff', fontFamily: 'var(--font-mono)' }}>{deleteDomainTarget.domain}</strong> 吗？
-              此操作将同步移除该域名下全部关联的 <strong style={{ color: '#fff' }}>{deleteDomainTarget.aliases.length}</strong> 个邮箱地址配置。
+              {t('domains.deleteDomainConfirmText').replace('{domain}', deleteDomainTarget.domain).replace('{count}', String(deleteDomainTarget.aliases.length))}
             </p>
 
             <div style={{
@@ -1231,7 +1228,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                   onChange={(e) => setDeleteDomainCascadeEmails(e.target.checked)}
                   style={{ accentColor: '#ef4444' }}
                 />
-                <span>同时清空该域名下本地已接收的历史邮件</span>
+                <span>{t('domains.deleteDomainCascade')}</span>
               </label>
             </div>
 
@@ -1248,7 +1245,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                   fontSize: '13px'
                 }}
               >
-                取消
+                {t('common.cancel')}
               </button>
               <button
                 onClick={handleConfirmDeleteDomain}
@@ -1264,7 +1261,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({
                   gap: '6px'
                 }}
               >
-                <Trash2 size={14} /> 确认删除域名
+                <Trash2 size={14} /> {t('domains.deleteDomain')}
               </button>
             </div>
           </div>

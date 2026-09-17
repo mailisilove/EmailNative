@@ -28,14 +28,14 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '5px',
-          padding: '5px 9px',
+          justifyContent: 'center',
+          width: '32px',
+          height: '32px',
+          padding: '0',
           borderRadius: '8px',
           background: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)',
           border: '1px solid var(--border-subtle)',
           color: 'var(--text-main)',
-          fontSize: '12px',
-          fontWeight: 600,
           cursor: 'pointer',
           transition: 'all 0.15s ease',
           ...style,
@@ -49,16 +49,11 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
           e.currentTarget.style.borderColor = 'var(--border-subtle)';
         }}
       >
-        {showIcon && (
-          isDark ? (
-            <Moon size={14} color="#38bdf8" />
-          ) : (
-            <Sun size={14} color="#f59e0b" />
-          )
+        {isDark ? (
+          <Moon size={15} color="#38bdf8" />
+        ) : (
+          <Sun size={15} color="#f59e0b" />
         )}
-        <span style={{ fontSize: '11px', fontWeight: 600 }}>
-          {isDark ? t('common.themeDark', '深色') : t('common.themeLight', '浅色')}
-        </span>
       </button>
     );
   }

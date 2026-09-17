@@ -15,6 +15,7 @@ import {
 } from '../types';
 import { INITIAL_MOCK_EMAILS } from '../email-gateway/mock-mail-generator';
 import { DEFAULT_DOMAINS, DEFAULT_LLM_CONFIG, DEFAULT_CLOUDFLARE_CONFIG, DEFAULT_OUTBOUND_CONFIG } from './default-data';
+import { MimeParser } from '../email-gateway/mime-parser';
 
 const STORAGE_KEYS = {
   EMAILS: 'emailnative_emails_v1',
@@ -50,7 +51,30 @@ export class LocalStorageDB {
 
   // ----------------- 邮件操作 -----------------
   static getEmails(): EmailMessage[] {
-    return this.load<EmailMessage[]>(STORAGE_KEYS.EMAILS, INITIAL_MOCK_EMAILS);
+    const raw = this.load<EmailMessage[]>(STORAGE_KEYS.EMAILS, INITIAL_MOCK_EMAILS);
+    return raw.map(m => {
+      const cleanTo = MimeParser.cleanEmailAddress(m.toAddress);
+      const cleanFrom = MimeParser.cleanEmailAddress(m.fromAddress);
+
+      // 自动清洗可能残存的原始 EML 网络头或 Base64 乱码
+      if (m.bodyText && (/^(?:Received:|ARC-|DKIM-|Return-Path:|From:|Subject:|Date:|Mime-Version:)/im.test(m.bodyText) || /^[A-Za-z0-9+/=\r\n\s]{40,}$/.test(m.bodyText.trim()))) {
+        const parsed = MimeParser.parseBody(m.bodyText);
+        return {
+          ...m,
+          toAddress: cleanTo || m.toAddress,
+          fromAddress: cleanFrom || m.fromAddress,
+          subject: MimeParser.decodeWords(m.subject),
+          fromName: MimeParser.decodeWords(m.fromName || m.fromAddress.split('@')[0]),
+          bodyText: parsed.plainText,
+          snippet: parsed.snippet || m.snippet,
+        };
+      }
+      return {
+        ...m,
+        toAddress: cleanTo || m.toAddress,
+        fromAddress: cleanFrom || m.fromAddress,
+      };
+    });
   }
 
   static saveEmails(emails: EmailMessage[]): void {
@@ -59,7 +83,12 @@ export class LocalStorageDB {
 
   static addEmail(email: EmailMessage): EmailMessage[] {
     const emails = this.getEmails();
-    const updated = [email, ...emails];
+    const cleanMail: EmailMessage = {
+      ...email,
+      toAddress: MimeParser.cleanEmailAddress(email.toAddress) || email.toAddress,
+      fromAddress: MimeParser.cleanEmailAddress(email.fromAddress) || email.fromAddress,
+    };
+    const updated = [cleanMail, ...emails];
     this.saveEmails(updated);
     return updated;
   }
@@ -86,7 +115,12 @@ export class LocalStorageDB {
     traditionalConfig?: TraditionalIMAPConfig
   ): ManagedDomain[] {
     const domains = this.getDomains();
-    const cleanDomain = domainName.toLowerCase().trim();
+    const cleanDomain = domainName.toLowerCase().trim()
+      .replace(/^https?:\/\//, '')
+      .replace(/^.*@/, '')
+      .replace(/\/.*$/, '')
+      .trim();
+
     const initialPrefix = traditionalConfig ? traditionalConfig.username.split('@')[0] : 'contact';
     const initialAddress = traditionalConfig ? traditionalConfig.username : `${initialPrefix}@${cleanDomain}`;
 
@@ -142,7 +176,11 @@ export class LocalStorageDB {
     const domains = this.getDomains();
     const updated = domains.map(d => {
       if (d.id !== domainId) return d;
-      const cleanPrefix = prefix.toLowerCase().replace(/[^a-z0-9_-]/g, '');
+      let cleanPrefix = prefix.toLowerCase().trim();
+      if (cleanPrefix.includes('@')) {
+        cleanPrefix = cleanPrefix.split('@')[0];
+      }
+      cleanPrefix = cleanPrefix.replace(/[^a-z0-9_.-]/g, '');
       const newAlias: DomainAlias = {
         id: `alias_${Date.now()}`,
         domainId: d.id,
@@ -161,6 +199,79 @@ export class LocalStorageDB {
     });
     this.saveDomains(updated);
     return updated;
+  }
+
+  /**
+   * 自动根据邮件来信地址发现域名和别名（支持 Catch-all 全收模式下的邮箱自动识别入册）
+   */
+  static autoDiscoverDomainsAndAliases(emails: EmailMessage[]): ManagedDomain[] {
+    let domains = this.getDomains();
+    let changed = false;
+
+    for (const mail of emails) {
+      const cleanTo = MimeParser.cleanEmailAddress(mail.toAddress);
+      const toDomain = MimeParser.extractEmailDomain(cleanTo);
+      const toPrefix = MimeParser.extractEmailPrefix(cleanTo);
+
+      if (!toDomain || !toPrefix) continue;
+
+      let dom = domains.find(d => d.domain.toLowerCase() === toDomain.toLowerCase());
+      if (!dom) {
+        const domainId = `dom_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+        const newDomain: ManagedDomain = {
+          id: domainId,
+          domain: toDomain,
+          status: 'active',
+          provider: 'cloudflare',
+          displayName: toDomain,
+          totalReceived: 1,
+          createdAt: new Date().toISOString(),
+          defaultAutomationLevel: 'balanced',
+          aliases: [
+            {
+              id: `alias_${Date.now()}_${toPrefix}`,
+              domainId: domainId,
+              prefix: toPrefix,
+              fullAddress: `${toPrefix}@${toDomain}`,
+              displayName: toPrefix,
+              description: '自动归集收信邮箱',
+              createdAt: new Date().toISOString(),
+              emailCount: 1,
+              isActive: true,
+              autoReplyEnabled: false,
+            }
+          ]
+        };
+        domains = [...domains, newDomain];
+        changed = true;
+      } else {
+        const aliasExists = dom.aliases.some(a => 
+          a.prefix.toLowerCase() === toPrefix.toLowerCase() ||
+          MimeParser.cleanEmailAddress(a.fullAddress) === cleanTo
+        );
+        if (!aliasExists) {
+          const newAlias: DomainAlias = {
+            id: `alias_${Date.now()}_${toPrefix}`,
+            domainId: dom.id,
+            prefix: toPrefix,
+            fullAddress: `${toPrefix}@${dom.domain}`,
+            displayName: toPrefix,
+            description: '自动归集收信邮箱',
+            createdAt: new Date().toISOString(),
+            emailCount: 1,
+            isActive: true,
+            autoReplyEnabled: false,
+          };
+          domains = domains.map(d => d.id === dom!.id ? { ...d, aliases: [...d.aliases, newAlias] } : d);
+          changed = true;
+        }
+      }
+    }
+
+    if (changed) {
+      this.saveDomains(domains);
+    }
+    return domains;
   }
 
   static updateAlias(domainId: string, aliasId: string, updates: Partial<DomainAlias>): ManagedDomain[] {

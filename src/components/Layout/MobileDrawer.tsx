@@ -263,7 +263,8 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
             {/* 各域名 */}
             {domains.map(dom => {
               const isDomSelected = selectedDomainId === dom.id;
-              const domUnread = unreadCountsByDomain[dom.domain] || 0;
+              const cleanDomName = dom.domain.toLowerCase().trim();
+              const domUnread = unreadCountsByDomain[cleanDomName] || unreadCountsByDomain[dom.domain] || 0;
 
               return (
                 <div key={dom.id} style={{ marginBottom: '8px' }}>
@@ -271,6 +272,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
                     onClick={() => {
                       onSelectDomain(dom.id);
                       onSelectAlias(null);
+                      onSelectCategory('all');
                       onClose();
                     }}
                     style={{
@@ -319,7 +321,8 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
                   <div style={{ paddingLeft: '14px', marginTop: '2px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
                     {dom.aliases.map(al => {
                       const isAliasSelected = selectedAliasId === al.id;
-                      const aliasUnread = unreadCountsByAlias[al.fullAddress] || 0;
+                      const cleanAliasAddr = al.fullAddress.toLowerCase().trim();
+                      const aliasUnread = unreadCountsByAlias[cleanAliasAddr] || unreadCountsByAlias[al.fullAddress] || 0;
 
                       return (
                         <button
@@ -327,6 +330,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
                           onClick={() => {
                             onSelectDomain(dom.id);
                             onSelectAlias(al.id);
+                            onSelectCategory('all');
                             onClose();
                           }}
                           style={{

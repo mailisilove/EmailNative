@@ -1,0 +1,299 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>EmailNative Product Manual & User Guide</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #1e293b;
+    line-height: 1.6;
+    margin: 40px;
+    background-color: #ffffff;
+  }
+  h1 {
+    color: #0f172a;
+    font-size: 28pt;
+    border-bottom: 2px solid #38bdf8;
+    padding-bottom: 12px;
+    margin-top: 20px;
+    margin-bottom: 15px;
+  }
+  h2 {
+    color: #1e3a8a;
+    font-size: 18pt;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 8px;
+    margin-top: 28px;
+    margin-bottom: 12px;
+  }
+  h3 {
+    color: #0369a1;
+    font-size: 14pt;
+    margin-top: 20px;
+    margin-bottom: 8px;
+  }
+  p, li {
+    font-size: 11pt;
+    color: #334155;
+  }
+  .tagline {
+    font-size: 13pt;
+    color: #64748b;
+    margin-bottom: 25px;
+    font-style: italic;
+  }
+  .highlight-box {
+    background-color: #f0f9ff;
+    border-left: 4px solid #0284c7;
+    padding: 14px 18px;
+    margin: 18px 0;
+    border-radius: 4px;
+  }
+  .warning-box {
+    background-color: #fffbeb;
+    border-left: 4px solid #f59e0b;
+    padding: 14px 18px;
+    margin: 18px 0;
+    border-radius: 4px;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 20px 0;
+    font-size: 10.5pt;
+  }
+  th, td {
+    border: 1px solid #cbd5e1;
+    padding: 10px 14px;
+    text-align: left;
+  }
+  th {
+    background-color: #f1f5f9;
+    color: #0f172a;
+    font-weight: 600;
+  }
+  tr:nth-child(even) {
+    background-color: #f8fafc;
+  }
+  code {
+    font-family: "Courier New", Courier, monospace;
+    background-color: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #0f172a;
+    font-size: 10pt;
+  }
+  .kbd {
+    display: inline-block;
+    padding: 2px 6px;
+    font-size: 9.5pt;
+    color: #334155;
+    background-color: #e2e8f0;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  }
+  .badge {
+    display: inline-block;
+    padding: 3px 8px;
+    font-size: 9pt;
+    font-weight: 600;
+    border-radius: 12px;
+    background-color: #e0f2fe;
+    color: #0369a1;
+  }
+</style>
+</head>
+<body>
+
+<h1>EmailNative ⚡ Product Manual & Operations Guide</h1>
+<div class="tagline">The Next-Generation Local-First Multi-Domain Email Workstation with Cloudflare, Resend, and DeepSeek-R1 AI</div>
+
+<div class="highlight-box">
+  <strong>Executive Value Summary:</strong> EmailNative completely replaces expensive commercial email suites ($6–$12 per user/domain monthly). By synergizing <strong>Cloudflare Email Routing</strong> (unlimited free inbound with wildcard catch-all), <strong>Resend API</strong> (3,000 free monthly outbound emails with DKIM/SPF anti-spam authentication), and local-first client storage, users can manage 10, 50, or 100+ domains with zero monthly server costs and zero data leak risks.
+</div>
+
+<h2>1. Comparative Analysis: Traditional Business Email vs EmailNative</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Dimension</th>
+      <th>Traditional Suites (Google / M365)</th>
+      <th>EmailNative Open-Source Workspace</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Monthly Cost (10 Domains)</strong></td>
+      <td><strong>$60 – $120 / month</strong> (charges per user & domain)</td>
+      <td><strong>$0 / Lifetime Free</strong> (leverages generous free tiers)</td>
+    </tr>
+    <tr>
+      <td><strong>Aliases & Prefixes</strong></td>
+      <td>Manual configuration required, strict quota limits</td>
+      <td><strong>Unlimited Dynamic Catch-All</strong> (receives on any prefix)</td>
+    </tr>
+    <tr>
+      <td><strong>Data Privacy & Keys</strong></td>
+      <td>Stored on cloud vendor servers</td>
+      <td><strong>Local-First & Zero Server Relay</strong> (Keys stay on device)</td>
+    </tr>
+    <tr>
+      <td><strong>AI Intelligence</strong></td>
+      <td>Basic spam scoring</td>
+      <td><strong>Native DeepSeek-R1</strong> long reasoning chains, OTP extraction</td>
+    </tr>
+    <tr>
+      <td><strong>Multi-Domain Switching</strong></td>
+      <td>Requires multiple browser logins and tab switching</td>
+      <td><strong>Unified native workspace</strong> with sub-millisecond switching</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>2. Complete Architecture & Zero-Server Security Model</h2>
+<p>
+  EmailNative strictly implements a <strong>Local-First Zero-Server Relay</strong> design. All API keys (Cloudflare Token, Resend API Key, DeepSeek API Key) and downloaded email bodies are saved exclusively within your local device’s secure Keychain / LocalStorage. No third-party or proprietary intermediary servers ever touch your communication data.
+</p>
+<ul>
+  <li><strong>Inbound Pipeline:</strong> Cloudflare Email Routing acts as high-throughput mail exchanger (MX), captures emails across any custom domain, triggers an edge Worker to parse MIME content, and stores records in Cloudflare D1.</li>
+  <li><strong>Outbound Pipeline:</strong> When you send a reply or compose a new email, the client sends directly to Resend's TLS-encrypted API using your private API key, signing messages with authentic DKIM cryptographic signatures.</li>
+  <li><strong>Cognitive AI Pipeline:</strong> When you request AI analysis on an email, the client sends prompts directly to DeepSeek's official endpoint, streaming reasoning chains (<code>&lt;think&gt;</code>) directly to your viewport.</li>
+</ul>
+
+<h2>3. Step-by-Step Setup Guide</h2>
+
+<h3>Step 1: Cloudflare Email Routing Configuration</h3>
+<ol>
+  <li>Log in to the Cloudflare Dashboard and select your domain name.</li>
+  <li>Navigate to <strong>Email &rarr; Email Routing</strong> and click <strong>Enable Email Routing</strong>.</li>
+  <li>Ensure the MX and basic SPF records are verified:</li>
+</ol>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Name</th>
+      <th>Target / Value</th>
+      <th>Priority</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>MX</td>
+      <td>@</td>
+      <td>isaac.mx.cloudflare.net</td>
+      <td>13</td>
+    </tr>
+    <tr>
+      <td>MX</td>
+      <td>@</td>
+      <td>linda.mx.cloudflare.net</td>
+      <td>57</td>
+    </tr>
+    <tr>
+      <td>MX</td>
+      <td>@</td>
+      <td>amir.mx.cloudflare.net</td>
+      <td>98</td>
+    </tr>
+    <tr>
+      <td>TXT</td>
+      <td>@</td>
+      <td>v=spf1 include:_spf.mx.cloudflare.net include:resend.com ~all</td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <td>TXT</td>
+      <td>_dmarc</td>
+      <td>v=DMARC1; p=none;</td>
+      <td>-</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Step 2: Cloudflare Email Inbound Worker & D1 Database</h3>
+<ol>
+  <li>Create a new Cloudflare Worker (e.g., <code>emailnative-gateway</code>).</li>
+  <li>Go to Worker <strong>Settings &rarr; Bindings</strong>, and create a D1 database binding named exactly <code>DB</code> (capital letters).</li>
+  <li>Under <strong>Variables</strong>, add an Environment Variable named <code>ADMIN_TOKEN</code> with a secure secret password.</li>
+  <li>Copy and deploy the production code from <code>cloudflare/worker.js</code>.</li>
+  <li>In <strong>Email Routing &rarr; Routing Rules</strong>, set the <strong>Catch-all rule</strong> action to <strong>Send to Worker</strong>, selecting your gateway worker.</li>
+</ol>
+
+<h3>Step 3: Resend Outbound Channel Setup</h3>
+<ol>
+  <li>Sign up for a free account at <a href="https://resend.com">resend.com</a>.</li>
+  <li>Add your domain and follow the instructions to add the DKIM CNAME records in Cloudflare DNS (ensure proxy status is <strong>DNS Only</strong> / grey cloud).</li>
+  <li>Generate a Sending API Key and paste it into EmailNative <strong>Settings &rarr; Outbound</strong>.</li>
+</ol>
+
+<h2>4. DeepSeek-R1 AI Intelligence & Cost Protection</h2>
+<div class="highlight-box">
+  <strong>Zero Token Waste Philosophy:</strong> EmailNative does not perform automated background token burning on incoming junk or low-value mail. All AI cognitive tasks run purely on-demand, giving the operator 100% financial control.
+</div>
+
+<h3>4.1 On-Demand AI Analysis</h3>
+<p>
+  When reviewing a customer recommendation, feature inquiry, or critical communication, click the <strong>AI Analysis</strong> button. DeepSeek-R1 will unpack the underlying intent, grade customer sentiment, assess urgency, and draft an appropriate reply matching the domain's brand persona.
+</p>
+
+<h3>4.2 Budget Protection & Circuit Breakers</h3>
+<p>
+  In <strong>Settings &rarr; Cost Safeguards</strong>, you can define:
+</p>
+<ul>
+  <li><strong>Max Cost Per Run:</strong> Protects against anomalous oversized emails from consuming excessive context tokens.</li>
+  <li><strong>Daily Budget Limit:</strong> When cumulative daily expenditure reaches your specified watermark, automated analysis halts immediately to protect your bank balance.</li>
+  <li><strong>Emergency Stop Button:</strong> At any point during a reasoning stream, you can click Emergency Stop to cancel network requests and freeze token calculation.</li>
+</ul>
+
+<h2>5. One-Click DNS & Deliverability Health Inspector</h2>
+<p>
+  To prevent legitimate outgoing business emails from ending up in spam folders, EmailNative features an integrated DNS Inspector:
+</p>
+<ul>
+  <li><strong>MX Verification:</strong> Ensures that incoming mail servers are configured and responsive.</li>
+  <li><strong>SPF Policy Check:</strong> Verifies that Resend's sending IPs are authorized in your domain's TXT record.</li>
+  <li><strong>DKIM Public Key Validation:</strong> Confirms public key cryptographic signature records exist.</li>
+  <li><strong>DMARC Alignment:</strong> Validates domain authentication policies.</li>
+</ul>
+
+<h2>6. Keyboard Shortcuts Quick Reference</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Shortcut</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="kbd">Cmd</span> + <span class="kbd">N</span></td>
+      <td>Compose New Email</td>
+    </tr>
+    <tr>
+      <td><span class="kbd">Cmd</span> + <span class="kbd">,</span></td>
+      <td>Open System Settings</td>
+    </tr>
+    <tr>
+      <td><span class="kbd">Cmd</span> + <span class="kbd">R</span></td>
+      <td>Sync Inbound Mail from Cloudflare</td>
+    </tr>
+    <tr>
+      <td><span class="kbd">Cmd</span> + <span class="kbd">T</span></td>
+      <td>Toggle Theme (Dark Glass / Pure Light)</td>
+    </tr>
+    <tr>
+      <td><span class="kbd">Esc</span></td>
+      <td>Close Modal / Inspector / Drawer</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="highlight-box">
+  <em>EmailNative is licensed under the MIT Open-Source License. For latest updates and community support, visit our GitHub repository: https://github.com/mailisilove/EmailNative</em>
+</div>
+
+</body>
+</html>

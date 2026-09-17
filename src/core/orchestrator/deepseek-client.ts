@@ -64,11 +64,15 @@ export class DeepSeekHarness {
             messages: [
               {
                 role: 'system',
-                content: `你是一个专业的域名邮箱智能秘书（基于 DSCode 架构）。你需要对来信进行深度研判，分析发信人意图，提炼关键实体，并在需要时草拟专业商务回复。${personaPrompt}`
+                content: `你是一位专业的产品经理兼资深客服专家。
+请仔细阅读发信人发来的邮件正文：
+1. 提炼发信人的核心意图与诉求（例如产品建议、功能需求、商务咨询等），用 1-2 句话清晰精炼总结，拒绝啰嗦废话；
+2. 结合产品定位与客服人设，写一段语气专业、真诚、有针对性的回复正文，供负责人审核后直接发送给用户。
+${personaPrompt}`
               },
               {
                 role: 'user',
-                content: `请研判这封邮件：\n发件人: ${email.fromAddress}\n收件地址: ${email.toAddress}\n主题: ${email.subject}\n正文:\n${email.bodyText}\n\n若需要回复，请给出包含主题与正文的草拟答复（正文末尾附带此签名：\n${sign}）。`
+                content: `发件人: ${email.fromAddress}\n收件地址: ${email.toAddress}\n主题: ${email.subject}\n\n邮件内容:\n${email.bodyText}\n\n请严格按以下格式输出：\n【核心意图】：(1-2句精炼总结)\n\n【建议回复】：\n(专业有针对性的回复正文，正文结尾附带此签名：\n${sign})`
               }
             ],
             stream: false,
@@ -81,25 +85,39 @@ export class DeepSeekHarness {
           const usage = json.usage || {};
           const duration = Date.now() - t0;
 
-          const reasoning = choice?.reasoning_content || 'DeepSeek-V3 快速推理链路已完成语义评估与实体提取。';
+          const reasoning = choice?.reasoning_content || 'DeepSeek 已完成语义评估与意图剖析。';
           const hitTokens = usage.prompt_cache_hit_tokens || 0;
           const missTokens = usage.prompt_cache_miss_tokens || usage.prompt_tokens || 100;
           const ratio = hitTokens + missTokens > 0 ? (hitTokens / (hitTokens + missTokens)) : 0;
 
-          const guessedCat = this.guessCategory(email);
-          let suggestedReply = undefined;
-          if (guessedCat === 'business') {
-            suggestedReply = {
-              subject: email.subject.startsWith('Re:') ? email.subject : `Re: ${email.subject}`,
-              body: choice?.content || `您好，已收到您的来信。我们将尽快处理并回复。\n\n${sign}`,
-              confidence: 0.94,
-              reasoning: `基于业务知识库深度理解：${domainContext?.aiPersona ? '已对齐专属产品线支持规范' : '标准商务拟复'}`
-            };
+          const fullContent = choice?.content || '';
+          let intentSummary = '';
+          let replyText = '';
+
+          const intentMatch = fullContent.match(/【核心意图】[：:]?\s*([\s\S]*?)(?=【建议回复】|$)/i);
+          const replyMatch = fullContent.match(/【建议回复】[：:]?\s*([\s\S]*)$/i);
+
+          if (intentMatch && intentMatch[1].trim()) {
+            intentSummary = intentMatch[1].trim();
           }
+          if (replyMatch && replyMatch[1].trim()) {
+            replyText = replyMatch[1].trim();
+          } else {
+            replyText = fullContent;
+            intentSummary = email.snippet || '客户来信咨询';
+          }
+
+          const guessedCat = this.guessCategory(email);
+          const suggestedReply = {
+            subject: email.subject.startsWith('Re:') ? email.subject : `Re: ${email.subject}`,
+            body: replyText,
+            confidence: 0.95,
+            reasoning: domainContext?.aiPersona ? '结合专属产品知识库起草' : '标准商务建议回复'
+          };
 
           return {
             category: guessedCat,
-            summary: choice?.content?.slice(0, 150) || email.snippet,
+            summary: intentSummary || email.snippet,
             urgency: 'medium',
             sentiment: 'neutral',
             suggestedReply,

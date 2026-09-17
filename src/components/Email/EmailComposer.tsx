@@ -85,7 +85,9 @@ export const EmailComposer: React.FC<EmailComposerProps> = ({
     setBody(prev => {
       const sign = selectedSender.signature || `\n\nBest regards,\n${selectedSender.displayName}`;
       const cleanPrev = prev.replace(sign, '').trim();
-      return `您好！\n\n关于 ${subject || '相关事宜'}：\n${cleanPrev || '希望与您沟通并探讨进一步合作细节。'}\n\n期待您的回复，祝一切顺利！\n\n${sign}`;
+      const regarding = t('composer.regarding').replace('{subject}', subject || t('emailDetail.noSubject'));
+      const discuss = cleanPrev || t('composer.defaultDiscussContent');
+      return `${t('composer.greeting')}\n\n${regarding}\n${discuss}\n\n${t('composer.lookingForward')}\n\n${sign}`;
     });
     setIsAiPolishing(false);
   };

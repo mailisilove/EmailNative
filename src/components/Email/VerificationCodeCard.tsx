@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Copy, Check, ShieldCheck, Clock } from 'lucide-react';
 import { VerificationCodeInfo } from '../../core/types';
+import { useI18n } from '../../core/i18n/I18nContext';
 
 interface VerificationCodeCardProps {
   info: VerificationCodeInfo;
 }
 
 export const VerificationCodeCard: React.FC<VerificationCodeCardProps> = ({ info }) => {
+  const { t } = useI18n();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -87,12 +89,12 @@ export const VerificationCodeCard: React.FC<VerificationCodeCardProps> = ({ info
         {copied ? (
           <>
             <Check size={13} />
-            <span>已复制</span>
+            <span>{t('common.copied')}</span>
           </>
         ) : (
           <>
             <Copy size={13} />
-            <span>复制</span>
+            <span>{t('common.copy')}</span>
           </>
         )}
       </button>

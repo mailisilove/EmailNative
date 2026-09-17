@@ -35,7 +35,7 @@ export class CloudflareWorkerClient {
   /**
    * 探测生产 Worker 连通性与健康状态
    */
-  async checkHealth(): Promise<{ ok: boolean; message: string; version?: string; d1Bound?: boolean; emailCount?: number }> {
+  async checkHealth(): Promise<{ ok: boolean; message: string; version?: string; d1Bound?: boolean; emailCount?: number; recentEmails?: any[] }> {
     if (!this.workerDomain || !this.workerDomain.startsWith('http')) {
       return { ok: false, message: '未配置合法的 Cloudflare Worker 域名 (需以 http:// 或 https:// 开头)' };
     }
@@ -65,7 +65,7 @@ export class CloudflareWorkerClient {
       if (data.d1_bound === false) {
         return {
           ok: false,
-          message: '⚠️ Worker 已在线，但未检测到 D1 数据库绑定！请在 wrangler.toml 中配置 binding = "DB"。',
+          message: '⚠️ Worker 已在线，但未检测到 D1 数据库绑定！请在 Cloudflare 控制台确认 Worker 是否添加了名为 "DB" 的 D1 绑定。',
           version: data.version,
           d1Bound: false,
         };
@@ -73,10 +73,11 @@ export class CloudflareWorkerClient {
 
       return { 
         ok: true, 
-        message: `✅ Cloudflare 网关运行正常 (D1 数据库就绪，已持久化 ${data.d1_emails_count || 0} 封真实来信)`,
+        message: `✅ Cloudflare 网关运行正常 (D1 数据库就绪，云端已存储 ${data.d1_emails_count || 0} 封真实来信)`,
         version: data.version,
         d1Bound: data.d1_bound,
-        emailCount: data.d1_emails_count,
+        emailCount: data.d1_emails_count ?? 0,
+        recentEmails: data.recent_emails || [],
       };
     } catch (err: any) {
       return { ok: false, message: err?.message || '网络连接超时或无法解析域名' };
@@ -92,7 +93,16 @@ export class CloudflareWorkerClient {
       const res = await fetch(`${this.workerDomain}/api/init_db`, {
         headers: this.headers,
       });
-      const data = await res.json();
+      const text = await res.text();
+      let data: any;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        return { 
+          ok: false, 
+          message: `线上 Worker 未更新最新代码，未识别 /api/init_db 路由（返回了: "${text.slice(0, 40)}"）。请在 Cloudflare D1 Console 直接执行建表 SQL，或将本地 worker.js 重新部署至线上。` 
+        };
+      }
       return { ok: res.ok && data.ok, message: data.message || '初始化完成' };
     } catch (err: any) {
       return { ok: false, message: err?.message || '请求初始化失败' };
@@ -134,24 +144,28 @@ export class CloudflareWorkerClient {
         const raw = item.raw || item.message || '';
         const parsed = MimeParser.parseBody(raw);
 
-        const domainPart = item.address ? item.address.split('@')[1] : '';
+        const cleanTo = MimeParser.cleanEmailAddress(item.address);
+        const cleanFrom = MimeParser.cleanEmailAddress(item.source);
+        const domainPart = MimeParser.extractEmailDomain(cleanTo);
+        const cleanSubject = MimeParser.decodeWords(item.subject || '(无主题)');
+        const cleanSourceName = MimeParser.decodeWords(item.source ? item.source.split('@')[0] : '未知发件人');
 
         const msg: EmailMessage = {
           id: item.id,
           domainId: domainPart || 'cf_domain',
-          toAddress: item.address,
-          fromAddress: item.source,
-          fromName: item.source.split('@')[0],
-          subject: item.subject || '(无主题)',
-          snippet: parsed.snippet || (item.message ? item.message.slice(0, 100) : ''),
-          bodyText: parsed.plainText || item.message || raw,
+          toAddress: cleanTo || item.address,
+          fromAddress: cleanFrom || item.source,
+          fromName: cleanSourceName,
+          subject: cleanSubject,
+          snippet: parsed.snippet,
+          bodyText: parsed.plainText,
           bodyHtml: parsed.cleanHtml || undefined,
           receivedAt: item.created_at || new Date().toISOString(),
           isRead: false,
           isStarred: false,
           isArchived: false,
           attachments: [],
-          agentProcessed: false, // 触发 DeepSeek-R1 自动分析
+          agentProcessed: false,
           labels: ['Live', 'Cloudflare'],
         };
 

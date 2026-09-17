@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { ManagedDomain } from '../../core/types';
 import { useI18n } from '../../core/i18n/I18nContext';
+import { MimeParser } from '../../core/email-gateway/mime-parser';
 
 interface SidebarProps {
   currentView: 'inbox' | 'domains' | 'agent' | 'analytics';
@@ -18,6 +19,8 @@ interface SidebarProps {
   setSelectedDomainId: (id: string | null) => void;
   selectedAliasId: string | null;
   setSelectedAliasId: (id: string | null) => void;
+  selectedCategory?: string;
+  setSelectedCategory?: (category: string) => void;
   unreadCount: number;
   unreadCountsByAlias?: Record<string, number>;
   unreadCountsByDomain?: Record<string, number>;
@@ -33,6 +36,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setSelectedDomainId,
   selectedAliasId,
   setSelectedAliasId,
+  selectedCategory = 'all',
+  setSelectedCategory,
   unreadCount,
   unreadCountsByAlias = {},
   unreadCountsByDomain = {},
@@ -266,13 +271,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           {domains.map(dom => {
             const isDomSelected = currentView === 'inbox' && selectedDomainId === dom.id;
-            const domainUnread = unreadCountsByDomain[dom.domain] || 0;
+            const cleanDomName = dom.domain.toLowerCase().trim();
+            const domainUnread = unreadCountsByDomain[cleanDomName] || unreadCountsByDomain[dom.domain] || 0;
 
             return (
               <div key={dom.id} style={{ marginBottom: '8px' }}>
                 <button
                   onClick={() => {
                     setCurrentView('inbox');
+                    setSelectedCategory?.('all');
                     setSelectedDomainId(dom.id);
                     setSelectedAliasId(null);
                   }}
@@ -288,7 +295,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     fontSize: '12px',
                     fontWeight: 500,
                   }}
-                  title={`点击查看 ${dom.domain} 所有邮件`}
+                  title={t('sidebar.viewDomainEmails').replace('{domain}', dom.domain)}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <div style={{
@@ -314,7 +321,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       </span>
                     )}
                     <span style={{ fontSize: '10px', color: 'var(--text-dim)' }}>
-                      {dom.aliases.length} 邮箱
+                      {t('sidebar.mailboxesCount').replace('{count}', String(dom.aliases.length))}
                     </span>
                   </div>
                 </button>
@@ -323,13 +330,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <div style={{ paddingLeft: '14px', marginTop: '2px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
                   {dom.aliases.map(al => {
                     const isAliasSelected = currentView === 'inbox' && selectedAliasId === al.id;
-                    const aliasUnread = unreadCountsByAlias[al.fullAddress] || 0;
+                    const cleanAliasAddr = MimeParser.cleanEmailAddress(al.fullAddress);
+                    const aliasUnread = unreadCountsByAlias[cleanAliasAddr] || unreadCountsByAlias[al.fullAddress] || 0;
 
                     return (
                       <button
                         key={al.id}
                         onClick={() => {
                           setCurrentView('inbox');
+                          setSelectedCategory?.('all');
                           setSelectedDomainId(dom.id);
                           setSelectedAliasId(al.id);
                         }}

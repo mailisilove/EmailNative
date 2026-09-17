@@ -495,7 +495,7 @@ export default {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
                 <label style={{ fontSize: '12px', color: 'var(--text-dim)', fontWeight: 600, display: 'block', marginBottom: '6px' }}>
-                  模型供应商 (Provider)
+                  {t('settings.llmProviderLabel')}
                 </label>
                 <select
                   value={llm.provider}
@@ -517,20 +517,20 @@ export default {
                     fontSize: '13px'
                   }}
                 >
-                  <option value="deepseek">DeepSeek (推荐，性价比之王)</option>
+                  <option value="deepseek">{t('settings.llmDeepseekOption')}</option>
                   <option value="anthropic">Anthropic Claude</option>
                   <option value="openai">OpenAI (GPT-4o)</option>
-                  <option value="ollama">Ollama (本地私有化部署，免费)</option>
+                  <option value="ollama">{t('settings.llmOllamaOption')}</option>
                 </select>
               </div>
 
               <div>
                 <label style={{ fontSize: '12px', color: 'var(--text-dim)', fontWeight: 600, display: 'block', marginBottom: '6px' }}>
-                  API Key 密钥
+                  {t('settings.apiKeyLabel')}
                 </label>
                 <input
                   type="password"
-                  placeholder={llm.provider === 'ollama' ? '本地模式无需填写 Key' : 'sk-...'}
+                  placeholder={llm.provider === 'ollama' ? t('settings.apiKeyOllamaPlaceholder') : 'sk-...'}
                   value={llm.apiKey}
                   onChange={(e) => setLlm({ ...llm, apiKey: e.target.value })}
                   style={{
@@ -545,13 +545,13 @@ export default {
                   }}
                 />
                 <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '4px' }}>
-                  密钥仅加密保存在本地安全存储（Local-First Keychain），不经过任何第三方服务器。
+                  {t('settings.apiKeySecurityNote')}
                 </div>
               </div>
 
               <div>
                 <label style={{ fontSize: '12px', color: 'var(--text-dim)', fontWeight: 600, display: 'block', marginBottom: '6px' }}>
-                  模型版本 (Model)
+                  {t('settings.modelLabel')}
                 </label>
                 {llm.provider === 'deepseek' ? (
                   <select
@@ -568,8 +568,8 @@ export default {
                       fontSize: '13px'
                     }}
                   >
-                    <option value="deepseek-reasoner">deepseek-reasoner (DeepSeek-R1 深度长思维链模型)</option>
-                    <option value="deepseek-chat">deepseek-chat (DeepSeek-V3 极速高性价比模型)</option>
+                    <option value="deepseek-reasoner">{t('settings.modelReasonerOption')}</option>
+                    <option value="deepseek-chat">{t('settings.modelChatOption')}</option>
                   </select>
                 ) : (
                   <input
@@ -609,13 +609,13 @@ export default {
                     onChange={(e) => setLlm({ ...llm, enableReasoningStream: e.target.checked })}
                     style={{ accentColor: 'var(--accent-primary)' }}
                   />
-                  <span>在邮件界面实时展示 DeepSeek 深度思考过程 (DSCode 体验)</span>
+                  <span>{t('settings.enableReasoningStreamLabel')}</span>
                 </label>
               </div>
 
               <div>
                 <label style={{ fontSize: '12px', color: 'var(--text-dim)', fontWeight: 600, display: 'block', marginBottom: '6px' }}>
-                  自定义 API Endpoint (可选)
+                  {t('settings.customEndpointLabel')}
                 </label>
                 <input
                   type="text"
@@ -756,7 +756,7 @@ export default {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <label style={{ fontSize: '13px', color: '#38bdf8', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <Mail size={15} />
-                    <span>集中归集主邮箱 (Central Master Forwarding)</span>
+                    <span>{t('settings.cfMasterForwardTitle')}</span>
                   </label>
                   <span style={{
                     fontSize: '11px',
@@ -767,13 +767,13 @@ export default {
                     border: '1px solid rgba(16, 185, 129, 0.3)',
                     fontWeight: 600
                   }}>
-                    永久默认接收
+                    {t('settings.cfMasterForwardDesc')}
                   </span>
                 </div>
 
                 <input
                   type="email"
-                  placeholder="例如: backup@yourdomain.com (选填)"
+                  placeholder={t('settings.cfMasterForwardPlaceholder')}
                   value={cf.masterForwardEmail || ''}
                   onChange={(e) => setCf({ ...cf, masterForwardEmail: e.target.value })}
                   style={{
@@ -790,13 +790,13 @@ export default {
                 />
 
                 <div style={{ fontSize: '11.5px', color: 'var(--text-dim)', lineHeight: '1.5' }}>
-                  填入此邮箱后，所有托管域名（如 <code>support@saas-demo.com</code>）收到的邮件均会自动静默抄送一份至该地址备份；若留空则仅存入 Cloudflare D1。
+                  {t('settings.cfMasterForwardNote')}
                 </div>
               </div>
 
               <div>
                 <label style={{ fontSize: '12px', color: 'var(--text-dim)', fontWeight: 600, display: 'block', marginBottom: '6px' }}>
-                  Cloudflare Worker 部署服务地址
+                  {t('settings.cfWorkerUrlLabel')}
                 </label>
                 <input
                   type="text"
@@ -818,11 +818,11 @@ export default {
 
               <div>
                 <label style={{ fontSize: '12px', color: 'var(--text-dim)', fontWeight: 600, display: 'block', marginBottom: '6px' }}>
-                  访问安全 Token (ADMIN_TOKEN)
+                  {t('settings.cfAdminTokenLabel')}
                 </label>
                 <input
                   type="password"
-                  placeholder="与 Worker 环境变量 ADMIN_TOKEN 一致"
+                  placeholder={t('settings.cfAdminTokenPlaceholder')}
                   value={cf.apiToken}
                   onChange={(e) => setCf({ ...cf, apiToken: e.target.value })}
                   style={{
@@ -859,7 +859,7 @@ export default {
                     }}
                   >
                     <Cloud size={14} className={cfTesting ? "animate-spin-slow" : ""} />
-                    <span>{cfTesting ? '正在探测生产服务...' : '测试生产 Worker 连通性'}</span>
+                    <span>{cfTesting ? t('settings.cfTestingBtn') : t('settings.cfTestBtn')}</span>
                   </button>
 
                   <button
@@ -879,10 +879,10 @@ export default {
                       gap: '6px',
                       cursor: initDbLoading ? 'not-allowed' : 'pointer'
                     }}
-                    title="在 Worker 绑定的 D1 数据库中自动建表，无需命令行"
+                    title={t('settings.cfInitDbTooltip')}
                   >
                     <Database size={14} className={initDbLoading ? "animate-spin-slow" : ""} />
-                    <span>{initDbLoading ? '正在初始化...' : '一键初始化 D1 数据表'}</span>
+                    <span>{initDbLoading ? t('settings.cfInitDbLoading') : t('settings.cfInitDbBtn')}</span>
                   </button>
                 </div>
 
@@ -909,7 +909,7 @@ export default {
                     gap: '6px'
                   }}>
                     {initDbMsg.ok ? <Check size={14} /> : null}
-                    <span>D1 初始化结果: {initDbMsg.message}</span>
+                    <span>{t('settings.cfInitDbResult')}: {initDbMsg.message}</span>
                   </div>
                 )}
               </div>
@@ -931,24 +931,16 @@ export default {
               }}>
                 <div style={{ fontWeight: 600, color: '#fff', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <Sparkles size={14} color="#818cf8" />
-                  <span>为什么需要配置发信通道？</span>
+                  <span>{t('settings.outboundWhyTitle')}</span>
                 </div>
                 <div>
-                  <strong>Cloudflare Email Routing</strong> 官方只提供邮件的<strong>“入站转发（只收不发）”</strong>，并没有对外发信的 SMTP 服务器。因此真实向外发信需要搭配出站通道：
-                  <ul style={{ margin: '6px 0 0 16px', padding: 0 }}>
-                    <li>
-                      <strong>推荐首选：Resend API</strong>（每月 <strong>3,000 封永久免费</strong>，送达率极高，带 DKIM/SPF 防垃圾箱认证）。
-                    </li>
-                    <li>
-                      <strong>步骤</strong>：在 <span style={{ color: '#38bdf8' }}>resend.com</span> 注册并添加你的域名，在 Cloudflare DNS 填入验证记录后，创建 API Key 粘贴于下方即可！
-                    </li>
-                  </ul>
+                  {t('settings.outboundWhyDesc')}
                 </div>
               </div>
 
               <div>
                 <label style={{ fontSize: '12px', color: 'var(--text-dim)', fontWeight: 600, display: 'block', marginBottom: '6px' }}>
-                  发信通道 (Outbound Engine)
+                  {t('settings.outboundEngineLabel')}
                 </label>
                 <select
                   value={outbound.provider}
@@ -963,8 +955,8 @@ export default {
                     fontSize: '13px'
                   }}
                 >
-                  <option value="resend">Resend API (推荐，每月 3000 封免费)</option>
-                  <option value="cloudflare">Cloudflare Worker 代理发信 (需配置 Worker 环境变量)</option>
+                  <option value="resend">{t('settings.outboundResendOption')}</option>
+                  <option value="cloudflare">{t('settings.outboundCfOption')}</option>
                 </select>
               </div>
 
@@ -973,7 +965,7 @@ export default {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <label style={{ fontSize: '12px', color: 'var(--text-dim)', fontWeight: 600 }}>
-                        Resend API Key
+                        {t('settings.resendKeyLabel')}
                       </label>
                       <span style={{
                         fontSize: '10px',
@@ -983,7 +975,7 @@ export default {
                         color: '#34d399',
                         fontWeight: 600
                       }}>
-                        🔒 本地优先存储 · 零中转
+                        {t('settings.resendZeroRelayBadge')}
                       </span>
                     </div>
                     <a
@@ -992,7 +984,7 @@ export default {
                       rel="noreferrer"
                       style={{ fontSize: '11px', color: '#818cf8', textDecoration: 'underline' }}
                     >
-                      获取免费 Resend API Key ↗
+                      {t('settings.resendGetKeyLink')}
                     </a>
                   </div>
                   <input
@@ -1012,7 +1004,7 @@ export default {
                     }}
                   />
                   <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '4px' }}>
-                    请确保您的域名已在 Resend 控制台通过 DNS 验证，否则邮件发件人将无法通过校验。
+                    {t('settings.resendDnsNote')}
                   </div>
 
                   {/* 一键 DNS (SPF/DKIM/DMARC) 与连通性体检卡片 */}
@@ -1032,17 +1024,17 @@ export default {
                       <ShieldCheck size={16} color="#38bdf8" />
                       <div>
                         <div style={{ fontSize: '12px', fontWeight: 600, color: '#fff' }}>
-                          连通性与 DNS (SPF / DKIM / DMARC) 自动化诊断
+                          {t('settings.dnsAuditCardTitle')}
                         </div>
                         <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                          一键排查发信是否受阻或进垃圾箱，校验 Resend 域名激活状态
+                          {t('settings.dnsAuditCardDesc')}
                         </div>
                       </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <input
                         type="text"
-                        placeholder="输入域名 (如 saas-demo.com)"
+                        placeholder={t('settings.dnsAuditInputPlaceholder')}
                         value={dnsTestDomain}
                         onChange={(e) => setDnsTestDomain(e.target.value)}
                         style={{
@@ -1075,7 +1067,7 @@ export default {
                         }}
                       >
                         <RefreshCw size={12} />
-                        <span>一键体检</span>
+                        <span>{t('settings.dnsAuditStartBtn')}</span>
                       </button>
                     </div>
                   </div>

@@ -20,17 +20,18 @@ export const LanguageToggle: React.FC<LanguageToggleProps> = ({
       <button
         onClick={toggleLanguage}
         title={t('header.langTooltip')}
+        aria-label="Toggle language"
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '5px',
-          padding: '5px 9px',
+          justifyContent: 'center',
+          width: '32px',
+          height: '32px',
+          padding: '0',
           borderRadius: '8px',
           background: 'rgba(255, 255, 255, 0.05)',
           border: '1px solid var(--border-subtle)',
           color: 'var(--text-main)',
-          fontSize: '12px',
-          fontWeight: 600,
           cursor: 'pointer',
           transition: 'all 0.15s ease',
           ...style,
@@ -44,10 +45,7 @@ export const LanguageToggle: React.FC<LanguageToggleProps> = ({
           e.currentTarget.style.borderColor = 'var(--border-subtle)';
         }}
       >
-        {showIcon && <Languages size={14} color="#818cf8" />}
-        <span style={{ fontFamily: 'var(--font-mono)' }}>
-          {language === 'zh' ? '中 / EN' : 'EN / 中'}
-        </span>
+        <Languages size={15} color="#818cf8" />
       </button>
     );
   }

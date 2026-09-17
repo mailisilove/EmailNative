@@ -12,12 +12,14 @@ import {
   FileText,
   ChevronLeft,
   Square,
+  CheckSquare,
   ShieldCheck
 } from 'lucide-react';
 import { EmailMessage } from '../../core/types';
 import { VerificationCodeCard } from './VerificationCodeCard';
 import { DeepSeekReasoningBox } from './DeepSeekReasoningBox';
 import { useI18n } from '../../core/i18n/I18nContext';
+import { MimeParser } from '../../core/email-gateway/mime-parser';
 
 interface EmailDetailProps {
   email: EmailMessage | null;
@@ -77,6 +79,12 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
       </div>
     );
   }
+
+  // 严格清洗邮件头部、发件人和正文（彻底剥离所有网络头与 Base64 乱码）
+  const cleanSubject = MimeParser.decodeWords(email.subject || t('emailDetail.noSubject'));
+  const cleanFromName = MimeParser.decodeWords(email.fromName || (email.fromAddress ? email.fromAddress.split('@')[0] : t('emailDetail.senderLabel')));
+  const parsedBody = MimeParser.parseBody(email.bodyText || '');
+  const cleanBodyText = parsedBody.plainText;
 
   const insight = email.agentInsight;
   const proposedReply = insight?.proposedReply;
@@ -187,21 +195,21 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '6px 12px',
+              padding: '6px 14px',
               borderRadius: '8px',
               background: 'rgba(239, 68, 68, 0.2)',
               border: '1px solid rgba(239, 68, 68, 0.5)',
               color: '#fca5a5',
-              fontSize: '11px',
+              fontSize: '12px',
               fontWeight: 600,
               cursor: 'pointer',
               boxShadow: '0 0 10px rgba(239, 68, 68, 0.25)',
             }}
             className="animate-pulse"
-            title={t('emailDetail.stopAgent')}
+            title={t('emailDetail.stopAnalysisTooltip')}
           >
             <Square size={12} fill="#f87171" color="#f87171" />
-            <span>{t('emailDetail.stopAgent')}</span>
+            <span>{t('emailDetail.stopAnalysis')}</span>
           </button>
         ) : (
           <button
@@ -209,18 +217,22 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '5px',
-              padding: '6px 10px',
+              gap: '6px',
+              padding: '6px 14px',
               borderRadius: '8px',
-              background: 'rgba(99, 102, 241, 0.15)',
-              border: '1px solid rgba(99, 102, 241, 0.3)',
-              color: '#c7d2fe',
-              fontSize: '11px',
-              fontWeight: 500
+              background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(168, 85, 247, 0.3) 100%)',
+              border: '1px solid rgba(168, 85, 247, 0.45)',
+              color: '#e0e7ff',
+              fontSize: '12px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              boxShadow: '0 2px 10px rgba(168, 85, 247, 0.15)',
+              transition: 'all 0.2s ease'
             }}
+            title={t('emailDetail.aiAnalyzeTooltip')}
           >
-            <Sparkles size={12} color="#a78bfa" />
-            <span>{t('emailList.runAgent')}</span>
+            <Sparkles size={13} color="#c084fc" />
+            <span>{insight ? t('emailDetail.reanalyzeBtn') : t('emailDetail.aiAnalyzeBtn')}</span>
           </button>
         )}
       </div>
@@ -301,7 +313,7 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
             lineHeight: 1.3,
             marginBottom: '10px'
           }}>
-            {email.subject}
+            {cleanSubject}
           </h1>
 
           <div style={{
@@ -324,11 +336,11 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
                 fontSize: '14px',
                 color: '#fff'
               }}>
-                {(email.fromName || email.fromAddress)[0].toUpperCase()}
+                {(cleanFromName || email.fromAddress)[0].toUpperCase()}
               </div>
               <div>
                 <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-white)' }}>
-                  {email.fromName || email.fromAddress}
+                  {cleanFromName}
                 </div>
                 <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ fontFamily: 'var(--font-mono)' }}>{email.fromAddress}</span>
@@ -344,7 +356,7 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
             </div>
 
             <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
-              {new Date(email.receivedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              {new Date(email.receivedAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
             </div>
           </div>
         </div>
@@ -363,58 +375,101 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
             padding: '12px 16px',
             marginBottom: '18px'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 600, color: 'var(--accent-primary)', marginBottom: '8px' }}>
-              <Sparkles size={12} color="var(--accent-primary)" />
-              <span>AI 提炼</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Sparkles size={14} color="#818cf8" />
+              <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-white)' }}>{t('emailDetail.aiExtractHeader')}</span>
             </div>
 
-            <div style={{ fontSize: '13px', color: 'var(--text-main)', lineHeight: 1.6 }}>
+            <div style={{ fontSize: '13px', color: 'var(--text-main)', lineHeight: 1.6, marginBottom: insight.actionItems && insight.actionItems.length > 0 ? '12px' : 0 }}>
               {insight.summary}
             </div>
 
             {/* 待办/日程清单 */}
-            {insight.actionItems.length > 0 && (
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '10px' }}>
-                {insight.actionItems.map((item) => (
-                  <div
-                    key={item.id}
-                    style={{
-                      background: 'var(--bg-surface-hover)',
-                      border: '1px solid var(--border-subtle)',
-                      borderRadius: '6px',
-                      padding: '5px 10px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      fontSize: '11px',
-                      color: 'var(--text-main)'
-                    }}
-                  >
-                    {item.type === 'payment' && <CreditCard size={12} color="#10b981" />}
-                    {item.type === 'calendar' && <Calendar size={12} color="#38bdf8" />}
-                    {item.type === 'todo' && <CheckCircle2 size={12} color="#f59e0b" />}
-                    <span>{item.title}</span>
-                  </div>
-                ))}
+            {insight.actionItems && insight.actionItems.length > 0 && (
+              <div style={{ marginBottom: '14px' }}>
+                <div style={{ fontSize: '11px', color: '#818cf8', fontWeight: 600, marginBottom: '6px' }}>
+                  {t('emailDetail.actionSummary')}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {insight.actionItems.map(item => (
+                    <div
+                      key={item.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        fontSize: '12px',
+                        color: 'var(--text-main)',
+                        background: 'var(--bg-surface)',
+                        padding: '6px 10px',
+                        borderRadius: '6px',
+                        border: '1px solid var(--border-subtle)'
+                      }}
+                    >
+                      <CheckSquare size={13} color="#818cf8" />
+                      <span>{item.title}</span>
+                      {item.dueDate && (
+                        <span style={{ fontSize: '11px', color: 'var(--text-dim)', marginLeft: 'auto' }}>
+                          {item.dueDate}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
         )}
 
-        {/* 邮件正文呈现 */}
+        {/* 邮件纯净正文呈现 */}
         <div style={{
           fontSize: '14px',
-          lineHeight: 1.7,
+          lineHeight: 1.65,
           color: 'var(--text-main)',
           whiteSpace: 'pre-wrap',
-          background: 'var(--bg-surface)',
-          padding: '20px',
-          borderRadius: '8px',
-          border: '1px solid var(--border-subtle)',
-          marginBottom: '24px'
+          marginBottom: '24px',
+          wordBreak: 'break-word',
+          fontFamily: 'inherit'
         }}>
-          {email.bodyText}
+          {cleanBodyText}
         </div>
+
+        {/* 若未进行过 AI 分析，提供按需分析卡片引导 */}
+        {!insight && !isAgentRunning && (
+          <div style={{
+            padding: '12px 16px',
+            borderRadius: '10px',
+            background: 'rgba(99, 102, 241, 0.05)',
+            border: '1px dashed rgba(99, 102, 241, 0.25)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '20px',
+            gap: '12px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#c7d2fe' }}>
+              <Sparkles size={14} color="#818cf8" style={{ flexShrink: 0 }} />
+              <span>{t('emailDetail.aiExtractPrompt')}</span>
+            </div>
+            <button
+              onClick={() => onRunAgent(email)}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '6px',
+                background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
+                border: 'none',
+                color: '#fff',
+                fontSize: '11.5px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                flexShrink: 0
+              }}
+            >
+              {t('emailDetail.aiAnalyzeSmallBtn')}
+            </button>
+          </div>
+        )}
 
         {/* 附件展示 */}
         {email.attachments.length > 0 && (

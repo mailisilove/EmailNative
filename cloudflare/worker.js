@@ -40,11 +40,91 @@ export default {
   // 1. 处理邮件接收事件 (Email Worker Trigger)
   async email(message, env, ctx) {
     try {
-      const to = message.to;
-      const from = message.from;
-      const subject = message.headers.get('subject') || '(无主题)';
+      let to = (message.to || '').trim().toLowerCase();
+      const toMatch = to.match(/<([^>]+)>/);
+      if (toMatch && toMatch[1]) to = toMatch[1].trim().toLowerCase();
+      to = to.replace(/^["']|["']$/g, '').trim();
 
-      // 步骤 A: 若配置了集中备份邮箱，必须在消费 stream 之前执行 forward()
+      let from = (message.from || '').trim().toLowerCase();
+      const fromMatch = from.match(/<([^>]+)>/);
+      if (fromMatch && fromMatch[1]) from = fromMatch[1].trim().toLowerCase();
+      from = from.replace(/^["']|["']$/g, '').trim();
+
+      const subject = (message.headers && message.headers.get('subject')) || '(无主题)';
+      const id = 'cf_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+
+      // 关键：安全提取 MIME 原始内容，绝不因 stream 问题崩溃
+      let rawEmail = '';
+      try {
+        if (message.raw) {
+          rawEmail = await new Response(message.raw).text();
+        }
+      } catch (rawErr) {
+        console.warn('[Worker] Failed to read message.raw, fallback to headers:', rawErr);
+        rawEmail = `From: ${from}\nTo: ${to}\nSubject: ${subject}\n\n[Content body unreadable via stream]`;
+      }
+
+      // 提取正文纯文本摘要（分离 Header，防止将 Received / DKIM 等网络头写入摘要）
+      let bodyForSnippet = rawEmail;
+      const headerSplit = rawEmail.match(/^(?:[\s\S]*?\r?\n)\r?\n([\s\S]*)$/);
+      if (headerSplit && headerSplit[1]) {
+        bodyForSnippet = headerSplit[1];
+        if (/^[A-Za-z0-9+/=\r\n\s]{30,}$/.test(bodyForSnippet.trim())) {
+          try {
+            bodyForSnippet = atob(bodyForSnippet.replace(/\s+/g, ''));
+          } catch {}
+        }
+      }
+
+      let snippet = bodyForSnippet
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .slice(0, 200)
+        .trim();
+      if (!snippet || snippet.length < 2) snippet = subject;
+
+      // D1 参数大小安全保护（SQLite 单变量限制，避免过大附件导致写入报错）
+      const maxRawLength = 600 * 1024; // 600KB
+      const safeRawEmail = rawEmail.length > maxRawLength 
+        ? rawEmail.slice(0, maxRawLength) + '\n\n[Warning: Content truncated by worker due to D1 size limit]'
+        : rawEmail;
+
+      // 核心第一优先级：必须确保 100% 存入 Cloudflare D1 数据库！
+      if (env.DB) {
+        try {
+          await env.DB.prepare(
+            'INSERT INTO emails (id, source, address, subject, message, raw, is_read, created_at) VALUES (?, ?, ?, ?, ?, ?, 0, ?)'
+          ).bind(id, from, to, subject, snippet, safeRawEmail, new Date().toISOString()).run();
+          console.log(`[Worker D1] Email saved successfully! ID: ${id}, To: ${to}`);
+        } catch (dbErr) {
+          console.error('[Worker D1 Error]', dbErr);
+          // 容错 1: 表不存在时自动建表重试
+          if (dbErr.message && dbErr.message.includes('no such table')) {
+            console.log('[Cloudflare Worker] Emails table missing, initializing automatically...');
+            await autoInitDatabase(env.DB);
+            try {
+              await env.DB.prepare(
+                'INSERT INTO emails (id, source, address, subject, message, raw, is_read, created_at) VALUES (?, ?, ?, ?, ?, ?, 0, ?)'
+              ).bind(id, from, to, subject, snippet, safeRawEmail, new Date().toISOString()).run();
+            } catch (retryErr) {
+              console.error('[Worker D1 Retry Error]', retryErr);
+            }
+          } else {
+            // 容错 2: 降级为只存纯文本摘要（防止 rawEmail 包含非法字节或超限）
+            try {
+              await env.DB.prepare(
+                'INSERT INTO emails (id, source, address, subject, message, raw, is_read, created_at) VALUES (?, ?, ?, ?, ?, ?, 0, ?)'
+              ).bind(id, from, to, subject, snippet, snippet, new Date().toISOString()).run();
+            } catch (fallbackErr) {
+              console.error('[Worker D1 Fallback Save Error]', fallbackErr);
+            }
+          }
+        }
+      } else {
+        console.warn('[Cloudflare Worker] env.DB is not bound! Please bind D1 with variable name "DB" in worker settings.');
+      }
+
+      // 可选第二优先级：静默抄送转发备份（绝不影响 D1 存库结果）
       if (env.FORWARD_TO_GMAIL && env.FORWARD_TO_GMAIL.trim() !== '') {
         try {
           await message.forward(env.FORWARD_TO_GMAIL.trim());
@@ -53,43 +133,7 @@ export default {
         }
       }
 
-      // 步骤 B: 提取 MIME 原始内容
-      const rawEmail = await new Response(message.raw).text();
-      const id = 'cf_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
-
-      // 提取纯文本摘要 (简单解析)
-      let snippet = rawEmail
-        .replace(/<[^>]+>/g, ' ')
-        .replace(/\s+/g, ' ')
-        .slice(0, 200)
-        .trim();
-
-      // D1 参数大小安全保护（SQLite 单变量限制，避免过大附件报错）
-      const maxRawLength = 800 * 1024; // 800KB
-      const safeRawEmail = rawEmail.length > maxRawLength 
-        ? rawEmail.slice(0, maxRawLength) + '\n\n[Warning: Content truncated by worker due to D1 size limit]'
-        : rawEmail;
-
-      // 步骤 C: 存入 Cloudflare D1 数据库 (供客户端秒级同步与 AI 研判)
-      if (env.DB) {
-        try {
-          await env.DB.prepare(
-            'INSERT INTO emails (id, source, address, subject, message, raw, is_read, created_at) VALUES (?, ?, ?, ?, ?, ?, 0, ?)'
-          ).bind(id, from, to, subject, snippet, safeRawEmail, new Date().toISOString()).run();
-        } catch (dbErr) {
-          if (dbErr.message && dbErr.message.includes('no such table')) {
-            console.log('[Cloudflare Worker] Emails table missing, initializing automatically...');
-            await autoInitDatabase(env.DB);
-            await env.DB.prepare(
-              'INSERT INTO emails (id, source, address, subject, message, raw, is_read, created_at) VALUES (?, ?, ?, ?, ?, ?, 0, ?)'
-            ).bind(id, from, to, subject, snippet, safeRawEmail, new Date().toISOString()).run();
-          } else {
-            throw dbErr;
-          }
-        }
-      }
-
-      // 步骤 D: 如果配置了 Webhook，可直接推送到中继或后端
+      // 可选第三优先级：Webhook 事件推送
       if (env.WEBHOOK_URL && env.WEBHOOK_URL.trim() !== '') {
         ctx.waitUntil(
           fetch(env.WEBHOOK_URL.trim(), {
@@ -132,12 +176,16 @@ export default {
     if (url.pathname === '/api/health') {
       let tableReady = false;
       let emailCount = 0;
+      let recentEmails = [];
 
       if (env.DB) {
         try {
           const res = await env.DB.prepare('SELECT COUNT(*) as count FROM emails').first();
           tableReady = true;
           emailCount = res ? (res.count || 0) : 0;
+
+          const recent = await env.DB.prepare('SELECT id, address, source, subject, created_at FROM emails ORDER BY created_at DESC LIMIT 3').all();
+          recentEmails = recent?.results || [];
         } catch (e) {
           tableReady = false;
         }
@@ -145,10 +193,11 @@ export default {
 
       return new Response(JSON.stringify({ 
         ok: true, 
-        version: '1.3.0-opensource',
+        version: '1.4.0-opensource',
         d1_bound: !!env.DB,
         d1_table_ready: tableReady,
         d1_emails_count: emailCount,
+        recent_emails: recentEmails,
         token_configured: !!env.ADMIN_TOKEN,
         token_matched: token ? tokenMatched : null,
         timestamp: new Date().toISOString()

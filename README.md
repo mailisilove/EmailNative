@@ -15,6 +15,10 @@
   <a href="https://github.com/mailisilove/EmailNative"><img src="https://img.shields.io/badge/GitHub-EmailNative-black?logo=github" alt="GitHub"></a>
 </p>
 
+<p align="center">
+  <strong>简体中文</strong> | <a href="README_EN.md">English</a> | <a href="docs/OPERATION_MANUAL_EN.md">English Manual (Markdown)</a> | <a href="docs/EmailNative_User_Manual_EN.doc">Word 文档 (.DOC)</a>
+</p>
+
 ---
 
 ## ⚡ 15 秒直击痛点：告别每月每个域名 $6 的商业邮箱账单

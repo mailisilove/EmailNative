@@ -28,6 +28,7 @@ import { PipelineCoordinator } from './core/orchestrator/pipeline-coordinator';
 import { OutboundSender } from './core/email-gateway/sender';
 import { generateRandomMockEmail } from './core/email-gateway/mock-mail-generator';
 import { CloudflareWorkerClient } from './core/email-gateway/cf-worker-client';
+import { MimeParser } from './core/email-gateway/mime-parser';
 
 export function App() {
   // 核心数据状态
@@ -89,6 +90,14 @@ export function App() {
     setIsProcessingAgent(false);
   };
 
+  // 启动时或邮件发生变化时，自动归集收信域名和邮箱别名，确保 100% 归类到侧边栏
+  useEffect(() => {
+    const updatedDomains = LocalStorageDB.autoDiscoverDomainsAndAliases(emails);
+    if (updatedDomains.length !== domains.length || JSON.stringify(updatedDomains) !== JSON.stringify(domains)) {
+      setDomains(updatedDomains);
+    }
+  }, [emails]);
+
   // 选中的域名与别名实体
   const selectedDomain = useMemo(() => {
     return domains.find(d => d.id === selectedDomainId);
@@ -135,18 +144,42 @@ export function App() {
       if (selectedCategory === 'transactional' && m.agentInsight?.category !== 'transactional') return false;
       if (selectedCategory === 'business' && m.agentInsight?.category !== 'business') return false;
 
-      // 域名过滤
-      if (selectedDomain && !m.toAddress.endsWith(`@${selectedDomain.domain}`)) {
-        return false;
+      const cleanTo = MimeParser.cleanEmailAddress(m.toAddress);
+      const toDomain = MimeParser.extractEmailDomain(cleanTo);
+      const toPrefix = MimeParser.extractEmailPrefix(cleanTo);
+
+      // 域名过滤：不仅支持后缀匹配，还支持 domainId 匹配与域名提取严格比对
+      if (selectedDomain) {
+        const cleanSelectedDomain = selectedDomain.domain.toLowerCase().trim();
+        const matchesDomain = 
+          m.domainId === selectedDomain.id ||
+          m.domainId.toLowerCase() === cleanSelectedDomain ||
+          toDomain === cleanSelectedDomain ||
+          cleanTo.endsWith(`@${cleanSelectedDomain}`) ||
+          cleanTo.includes(`@${cleanSelectedDomain}`);
+        if (!matchesDomain) {
+          return false;
+        }
       }
-      // 别名过滤
-      if (selectedAlias && m.toAddress !== selectedAlias.fullAddress) {
-        return false;
+
+      // 别名过滤：比对完整邮箱、前缀与别名实体
+      if (selectedAlias) {
+        const cleanAliasAddr = MimeParser.cleanEmailAddress(selectedAlias.fullAddress);
+        const cleanAliasPrefix = selectedAlias.prefix.toLowerCase().trim();
+        const matchesAlias = 
+          cleanTo === cleanAliasAddr ||
+          (toPrefix === cleanAliasPrefix && toDomain === selectedDomain?.domain.toLowerCase().trim()) ||
+          cleanTo.startsWith(`${cleanAliasPrefix}@`) ||
+          cleanTo.includes(`${cleanAliasPrefix}@`);
+        if (!matchesAlias) {
+          return false;
+        }
       }
+
       // 搜索过滤
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
-        const matchText = (m.subject + ' ' + m.snippet + ' ' + m.fromAddress + ' ' + (m.agentInsight?.verificationCode?.code || '')).toLowerCase();
+        const matchText = (m.subject + ' ' + m.snippet + ' ' + m.fromAddress + ' ' + cleanTo + ' ' + (m.agentInsight?.verificationCode?.code || '')).toLowerCase();
         return matchText.includes(q);
       }
       return true;
@@ -166,7 +199,10 @@ export function App() {
     const counts: Record<string, number> = {};
     emails.forEach(e => {
       if (!e.isRead) {
-        counts[e.toAddress] = (counts[e.toAddress] || 0) + 1;
+        const cleanTo = MimeParser.cleanEmailAddress(e.toAddress);
+        if (cleanTo) {
+          counts[cleanTo] = (counts[cleanTo] || 0) + 1;
+        }
       }
     });
     return counts;
@@ -177,7 +213,7 @@ export function App() {
     const counts: Record<string, number> = {};
     emails.forEach(e => {
       if (!e.isRead) {
-        const domPart = e.toAddress.split('@')[1];
+        const domPart = MimeParser.extractEmailDomain(e.toAddress);
         if (domPart) {
           counts[domPart] = (counts[domPart] || 0) + 1;
         }
@@ -189,11 +225,11 @@ export function App() {
   // 当前激活收件箱标题 (融合域名与分类状态)
   const currentInboxTitle = useMemo(() => {
     const categoryLabels: Record<string, string> = {
-      unread: '未读邮件',
-      starred: '星标邮件',
-      verification: '验证码',
-      transactional: '财务账单',
-      business: '重要沟通',
+      unread: t('emailList.unread'),
+      starred: t('emailList.starred'),
+      verification: t('emailList.verification'),
+      transactional: t('emailList.transactional'),
+      business: t('emailList.business'),
     };
 
     const catPrefix = categoryLabels[selectedCategory] ? `${categoryLabels[selectedCategory]} · ` : '';
@@ -204,14 +240,18 @@ export function App() {
     if (selectedDomain) {
       return `${catPrefix}${selectedDomain.displayName || selectedDomain.domain}`;
     }
-    return `${catPrefix}${categoryLabels[selectedCategory] || '全部邮件'}`;
-  }, [selectedDomain, selectedAlias, selectedCategory]);
+    return `${catPrefix}${categoryLabels[selectedCategory] || t('sidebar.allInboxes')}`;
+  }, [selectedDomain, selectedAlias, selectedCategory, t]);
 
   // 提取特定邮件对应的域名知识库上下文与签名
   const getEmailDomainContext = (email: EmailMessage) => {
-    const domPart = email.toAddress.split('@')[1];
-    const dom = domains.find(d => d.domain === domPart);
-    const alias = dom?.aliases.find(a => a.fullAddress === email.toAddress);
+    const cleanTo = MimeParser.cleanEmailAddress(email.toAddress);
+    const domPart = MimeParser.extractEmailDomain(cleanTo);
+    const dom = domains.find(d => d.domain.toLowerCase() === domPart.toLowerCase() || d.id === email.domainId);
+    const alias = dom?.aliases.find(a => 
+      MimeParser.cleanEmailAddress(a.fullAddress) === cleanTo ||
+      a.prefix.toLowerCase() === MimeParser.extractEmailPrefix(cleanTo)
+    );
 
     return {
       aiPersona: alias?.aiPersona || dom?.aiPersona,
@@ -283,9 +323,15 @@ export function App() {
     setActiveAgentEmailId(email.id);
     setIsProcessingAgent(true);
     const domainCtx = getEmailDomainContext(email);
+    const cleanedEmail: EmailMessage = {
+      ...email,
+      subject: MimeParser.decodeWords(email.subject),
+      bodyText: MimeParser.parseBody(email.bodyText || '').plainText,
+      fromName: MimeParser.decodeWords(email.fromName || email.fromAddress.split('@')[0]),
+    };
     try {
       const { insight, run } = await coordinator.runPipeline(
-        email, 
+        cleanedEmail, 
         (interimRun) => {
           setPipelineRuns(prev => [interimRun, ...prev.filter(r => r.runId !== interimRun.runId)]);
         },
@@ -375,7 +421,7 @@ export function App() {
   // 从 Cloudflare 生产 Worker 同步真实生产邮件
   const handleSyncProduction = async () => {
     if (!cfConfig.workerDomain) {
-      alert('请先在设置中填写 Cloudflare Worker 生产域名地址');
+      alert(t('header.syncWorkerMissing'));
       setIsSettingsOpen(true);
       return;
     }
@@ -389,52 +435,42 @@ export function App() {
       if (liveMails.length === 0) {
         const health = await client.checkHealth();
         if (health.ok) {
-          alert('✅ 已连通 Cloudflare 生产服务！当前暂无未同步的最新邮件。');
+          const totalInCloud = health.emailCount ?? 0;
+          if (totalInCloud === 0) {
+            alert(t('header.syncZeroAlert'));
+          } else {
+            alert(t('header.syncCurrentLatest').replace('{count}', String(totalInCloud)));
+          }
         } else {
-          alert(`⚠️ Cloudflare 连通性提示: ${health.message}`);
+          alert(`⚠️ Cloudflare: ${health.message}`);
         }
         return;
       }
 
       let currentEmails = emails;
-      let currentDomains = domains;
       for (const newMail of liveMails) {
         currentEmails = LocalStorageDB.addEmail(newMail);
-        setEmails(currentEmails);
+      }
+      setEmails(currentEmails);
 
-        // 自动识别新域名并加入管理列表
-        const domPart = newMail.toAddress.split('@')[1];
-        if (domPart && !currentDomains.some(d => d.domain === domPart)) {
-          currentDomains = LocalStorageDB.addDomain(domPart, 'cloudflare');
-          setDomains(currentDomains);
-        }
+      // 自动识别新邮件所属的域名与邮箱别名，自动补齐入册并精准归类
+      const updatedDomains = LocalStorageDB.autoDiscoverDomainsAndAliases(currentEmails);
+      setDomains(updatedDomains);
 
-        // 仅在开启来信自动研判时才执行大模型调用，防无感知扣费
-        if (llmConfig.autoProcessInbound) {
-          try {
-            const domainCtx = getEmailDomainContext(newMail);
-            const { insight, run } = await coordinator.runPipeline(
-              newMail, 
-              (interimRun) => {
-                setPipelineRuns(prev => [interimRun, ...prev.filter(r => r.runId !== interimRun.runId)]);
-              },
-              domainCtx
-            );
-            LocalStorageDB.addPipelineRun(run);
-            currentEmails = LocalStorageDB.updateEmail(newMail.id, {
-              agentProcessed: run.status !== 'stopped',
-              agentInsight: insight,
-            });
-            setEmails(currentEmails);
-          } catch (err) {
-            console.error('Agent pipeline error for live mail:', err);
-          }
+      // 自动切换视图并高亮最新邮件，让用户立刻看到
+      if (liveMails.length > 0) {
+        setSelectedCategory('all');
+        setSelectedDomainId(null);
+        setSelectedAliasId(null);
+        setSelectedEmailId(liveMails[0].id);
+        if (isMobile) {
+          setMobileActiveEmail(liveMails[0]);
         }
       }
 
-      alert(`🎉 成功从 Cloudflare 同步 ${liveMails.length} 封生产邮件！${llmConfig.autoProcessInbound ? 'DeepSeek-R1 已完成自动研判。' : '可手动选择重点邮件进行 AI 研判。'}`);
+      alert(t('header.syncSuccessAlert').replace('{count}', String(liveMails.length)));
     } catch (err: any) {
-      alert(`⚠️ Cloudflare 同步提示: ${err?.message || '网络连接超时'}`);
+      alert(`⚠️ Cloudflare: ${err?.message || 'Network timeout'}`);
     } finally {
       setIsSyncingProduction(false);
     }
@@ -459,7 +495,7 @@ export function App() {
     fromAddress?: string, 
     fromName?: string
   ): Promise<{ success: boolean; error?: string }> => {
-    if (!selectedEmail) return { success: false, error: '未选择邮件' };
+    if (!selectedEmail) return { success: false, error: t('emailDetail.emptyPrompt') };
     const actualFrom = fromAddress || selectedEmail.toAddress;
     const ctx = getEmailDomainContext(selectedEmail);
     const res = await sender.send({
@@ -573,6 +609,8 @@ export function App() {
           setSelectedDomainId={setSelectedDomainId}
           selectedAliasId={selectedAliasId}
           setSelectedAliasId={setSelectedAliasId}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
           unreadCount={unreadCount}
           unreadCountsByAlias={unreadCountsByAlias}
           unreadCountsByDomain={unreadCountsByDomain}
